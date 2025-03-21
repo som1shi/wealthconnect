@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebtSmart - Intelligent Debt Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a23e6feb03.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="#" class="logo">
+                    <img src="assets/logo.svg" alt="DebtSmart Logo">
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#accounts">My Accounts</a></li>
+                    <li><a href="#repayment">Debt Plan</a></li>
+                    <li><a href="#alerts">Alerts</a></li>
+                    <li><a href="#insights">Insights</a></li>
+                    <li class="dropdown">
+                        <a href="#more">More <i class="fas fa-chevron-down"></i></a>
+                    </li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="#notifications" class="icon-btn"><i class="fas fa-bell"></i></a>
+                    <a href="#account" class="btn btn-outline">Log In</a>
+                    <a href="#signup" class="btn btn-primary">Get Started</a>
+                </div>
+                <button class="mobile-menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Overview -->
+    <section id="dashboard" class="dashboard">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Left Sidebar -->
+                <div class="sidebar">
+                    <div class="user-profile">
+                        <div class="profile-image">
+                            <img src="assets/default-profile.svg" alt="Profile">
+                        </div>
+                        <div class="profile-info">
+                            <h3>Welcome Back</h3>
+                            <p class="user-name">Guest User</p>
+                            <a href="#account" class="profile-link">My Profile <i class="fas fa-chevron-right"></i></a>
+                        </div>
+                    </div>
+                    
+                    <nav class="sidebar-nav">
+                        <ul>
+                            <li class="active"><a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                            <li><a href="#accounts"><i class="fas fa-wallet"></i> My Accounts</a></li>
+                            <li><a href="#repayment"><i class="fas fa-chart-line"></i> Debt Plan</a></li>
+                            <li><a href="#alerts"><i class="fas fa-bell"></i> Alerts</a></li>
+                            <li><a href="#insights"><i class="fas fa-lightbulb"></i> Insights</a></li>
+                            <li><a href="#community"><i class="fas fa-users"></i> Community</a></li>
+                            <li><a href="#settings"><i class="fas fa-cog"></i> Settings</a></li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="sidebar-cta">
+                        <h4>Debt Freedom Calculator</h4>
+                        <p>See how fast you can become debt-free</p>
+                        <a href="#calculator" class="btn btn-secondary btn-block">Calculate Now</a>
+                    </div>
+                </div>
+                
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <div class="page-header">
+                        <h1>Your Debt Dashboard</h1>
+                        <div class="header-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Export</button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="card total-debt">
+                            <div class="card-content">
+                                <h3>Total Debt</h3>
+                                <p class="amount">$24,850</p>
+                                <p class="change negative"><i class="fas fa-arrow-down"></i> $750 since last month</p>
+                            </div>
+                            <div class="card-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="card monthly-payment">
+                            <div class="card-content">
+                                <h3>Monthly Payment</h3>
+                                <p class="amount">$875</p>
+                                <p class="subtitle">Next payment: June 15</p>
+                            </div>
+                            <div class="card-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="card debt-free">
+                            <div class="card-content">
+                                <h3>Debt-Free Date</h3>
+                                <p class="date">March 2026</p>
+                                <p class="subtitle">2.8 years remaining</p>
+                            </div>
+                            <div class="card-icon">
+                                <i class="fas fa-flag-checkered"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="card interest-saved">
+                            <div class="card-content">
+                                <h3>Interest Saved</h3>
+                                <p class="amount">$3,219</p>
+                                <p class="change positive"><i class="fas fa-arrow-up"></i> $120 since last month</p>
+                            </div>
+                            <div class="card-icon">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Debt Progress -->
+                    <div class="card debt-progress">
+                        <div class="card-header">
+                            <h2>Debt Payoff Progress</h2>
+                            <div class="card-actions">
+                                <select class="time-filter">
+                                    <option>This Year</option>
+                                    <option>Last 6 Months</option>
+                                    <option>All Time</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-overview">
+                                <div class="progress-stat">
+                                    <h4>Total Progress</h4>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 35%;"></div>
+                                        </div>
+                                        <p>35% paid off</p>
+                                    </div>
+                                </div>
+                                <div class="progress-stat">
+                                    <h4>Time Progress</h4>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar">
+                                            <div class="progress time-progress" style="width: 42%;"></div>
+                                        </div>
+                                        <p>42% of time elapsed</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="debt-chart-container">
+                                <canvas id="debtPayoffChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Debt Breakdown -->
+                    <div class="card-row">
+                        <div class="card debt-breakdown">
+                            <div class="card-header">
+                                <h2>Debt Breakdown</h2>
+                                <div class="card-actions">
+                                    <a href="#accounts" class="btn btn-text">View All <i class="fas fa-chevron-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="debt-breakdown-chart">
+                                    <canvas id="debtBreakdownChart"></canvas>
+                                </div>
+                                <div class="debt-list">
+                                    <div class="debt-item student-loan">
+                                        <div class="debt-info">
+                                            <div class="debt-label">
+                                                <span class="dot"></span>
+                                                <h4>Student Loans</h4>
+                                            </div>
+                                            <p class="debt-amount">$12,500</p>
+                                        </div>
+                                        <div class="debt-progress-container">
+                                            <div class="progress-bar">
+                                                <div class="progress" style="width: 45%;"></div>
+                                            </div>
+                                            <p>45% paid</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="debt-item credit-cards">
+                                        <div class="debt-info">
+                                            <div class="debt-label">
+                                                <span class="dot"></span>
+                                                <h4>Credit Cards</h4>
+                                            </div>
+                                            <p class="debt-amount">$5,350</p>
+                                        </div>
+                                        <div class="debt-progress-container">
+                                            <div class="progress-bar">
+                                                <div class="progress" style="width: 20%;"></div>
+                                            </div>
+                                            <p>20% paid</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="debt-item auto-loan">
+                                        <div class="debt-info">
+                                            <div class="debt-label">
+                                                <span class="dot"></span>
+                                                <h4>Auto Loan</h4>
+                                            </div>
+                                            <p class="debt-amount">$7,000</p>
+                                        </div>
+                                        <div class="debt-progress-container">
+                                            <div class="progress-bar">
+                                                <div class="progress" style="width: 60%;"></div>
+                                            </div>
+                                            <p>60% paid</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Refinance Opportunities -->
+                        <div class="card refinance-opportunities">
+                            <div class="card-header">
+                                <h2>Refinance Opportunities</h2>
+                                <div class="card-actions">
+                                    <a href="#refinance" class="btn btn-text">View All <i class="fas fa-chevron-right"></i></a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert opportunity-alert">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-percentage"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>Rate Drop Alert: Student Loan</h4>
+                                        <p>Current rate: 6.8% | Available rate: 4.5%</p>
+                                        <p class="savings">Potential savings: $2,450</p>
+                                        <a href="#refinance-detail" class="btn btn-sm btn-primary">See Details</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert opportunity-alert">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>Balance Transfer Opportunity</h4>
+                                        <p>0% APR for 18 months on credit card transfers</p>
+                                        <p class="savings">Potential savings: $680</p>
+                                        <a href="#refinance-detail" class="btn btn-sm btn-primary">See Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Payments -->
+                    <div class="card upcoming-payments">
+                        <div class="card-header">
+                            <h2>Upcoming Payments</h2>
+                            <div class="card-actions">
+                                <a href="#payment-schedule" class="btn btn-text">View All <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="payment-list">
+                                <div class="payment-item">
+                                    <div class="payment-date">
+                                        <p class="day">15</p>
+                                        <p class="month">JUN</p>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h4>Student Loan Payment</h4>
+                                        <p>Federal Student Aid</p>
+                                    </div>
+                                    <div class="payment-amount">
+                                        <p>$350</p>
+                                    </div>
+                                    <div class="payment-actions">
+                                        <a href="#pay-now" class="btn btn-sm btn-primary">Pay Now</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-item">
+                                    <div class="payment-date">
+                                        <p class="day">18</p>
+                                        <p class="month">JUN</p>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h4>Credit Card Minimum</h4>
+                                        <p>Chase Freedom</p>
+                                    </div>
+                                    <div class="payment-amount">
+                                        <p>$125</p>
+                                    </div>
+                                    <div class="payment-actions">
+                                        <a href="#pay-now" class="btn btn-sm btn-primary">Pay Now</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-item">
+                                    <div class="payment-date">
+                                        <p class="day">22</p>
+                                        <p class="month">JUN</p>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h4>Auto Loan Payment</h4>
+                                        <p>Capital One Auto</p>
+                                    </div>
+                                    <div class="payment-amount">
+                                        <p>$400</p>
+                                    </div>
+                                    <div class="payment-actions">
+                                        <a href="#pay-now" class="btn btn-sm btn-primary">Pay Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Sidebar - Insights & Tips -->
+                <div class="sidebar right-sidebar">
+                    <div class="card premium-features">
+                        <div class="card-header">
+                            <h3>Premium Features</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                <li>
+                                    <i class="fas fa-coins"></i>
+                                    <div>
+                                        <h4>Round-Up Payments</h4>
+                                        <p>Pay off debt faster with spare change</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-file-contract"></i>
+                                    <div>
+                                        <h4>Contract Analysis</h4>
+                                        <p>AI-powered loan term review</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <i class="fas fa-comments-dollar"></i>
+                                    <div>
+                                        <h4>Rate Negotiation</h4>
+                                        <p>Automated interest rate reduction</p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <a href="#premium" class="btn btn-primary btn-block">Upgrade to Premium</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card tips-insights">
+                        <div class="card-header">
+                            <h3>Financial Insights</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="tip">
+                                <div class="tip-icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h4>Debt Snowball Method</h4>
+                                    <p>Paying off smaller debts first can create momentum and motivation.</p>
+                                    <a href="#learn-more">Learn more</a>
+                                </div>
+                            </div>
+                            
+                            <div class="tip">
+                                <div class="tip-icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h4>50/30/20 Budget Rule</h4>
+                                    <p>Allocate 50% to needs, 30% to wants, and 20% to savings & debt.</p>
+                                    <a href="#learn-more">Learn more</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card community-highlights">
+                        <div class="card-header">
+                            <h3>Community Highlights</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="community-post">
+                                <div class="post-author">
+                                    <img src="assets/avatar1.jpg" alt="Sarah J.">
+                                    <span>Sarah J.</span>
+                                </div>
+                                <p>"Just made my final student loan payment! The snowball method really worked for me."</p>
+                                <div class="post-reactions">
+                                    <span><i class="fas fa-heart"></i> 42</span>
+                                    <span><i class="fas fa-comment"></i> 15</span>
+                                </div>
+                            </div>
+                            <a href="#community" class="btn btn-outline btn-block">Join the Community</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Additional sections would go here but are hidden by default in the dashboard view -->
+    
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="assets/logo-white.svg" alt="DebtSmart Logo">
+                    <p>Empowering people to take control of their finances and eliminate debt through intelligent tools and community support.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Features</h4>
+                    <ul>
+                        <li><a href="#dashboard">Debt Dashboard</a></li>
+                        <li><a href="#refinance">Refinancing Alerts</a></li>
+                        <li><a href="#repayment">Repayment Plans</a></li>
+                        <li><a href="#credit-grader">Credit Card Grader</a></li>
+                        <li><a href="#premium">Premium Features</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#press">Press</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#security">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 DebtSmart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
