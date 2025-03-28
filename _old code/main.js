@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Debt Payoff Chart
     const debtPayoffCtx = document.getElementById('debtPayoffChart').getContext('2d');
     const debtPayoffChart = new Chart(debtPayoffCtx, {
         type: 'line',
@@ -43,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Debt Breakdown Chart
     const debtBreakdownCtx = document.getElementById('debtBreakdownChart').getContext('2d');
     const debtBreakdownChart = new Chart(debtBreakdownCtx, {
         type: 'doughnut',
@@ -71,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mobile menu toggle
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
     
