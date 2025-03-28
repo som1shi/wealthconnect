@@ -152,7 +152,7 @@ export function Features() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground">
-            We've built the tools you need to take control of your financial future
+            We&apos;ve built the tools you need to take control of your financial future
             and achieve your goals faster.
           </p>
         </div>

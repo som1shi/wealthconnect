@@ -86,8 +86,7 @@ export function Pricing() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground">
-            Choose the plan that's right for your financial journey. All plans
-            include a 14-day free trial.
+            Choose the plan that&apos;s right for you: All plans include a 14-day free trial.
           </p>
         </div>
 

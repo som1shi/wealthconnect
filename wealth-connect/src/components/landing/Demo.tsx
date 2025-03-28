@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 
@@ -415,7 +414,7 @@ const demoFeatures = [
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                     <div className="text-xs">
-                      Using this method, you'll be debt-free <span className="font-medium">7 months sooner</span> and save <span className="font-medium">$840</span> in interest!
+                      Using this method, you&apos;ll be debt-free <span className="font-medium">7 months sooner</span> and save <span className="font-medium">$840</span> in interest!
                     </div>
                   </div>
                 </div>
