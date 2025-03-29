@@ -14,8 +14,6 @@ export default function WaitlistPage() {
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
-    const name = formData.get("name");
-    const email = formData.get("email");
     
     try {
       await fetch(
@@ -28,7 +26,6 @@ export default function WaitlistPage() {
       );
       
       setIsSubmitted(true);
-      e.currentTarget.reset();
     } catch (error) {
       console.error("Error:", error);
     } finally {
