@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const testimonials = [
   {
     quote:
-      "WealthConnect changed my approach to investing. The AI-powered recommendations helped me optimize my portfolio and I've seen a 22% increase in returns.",
+      "ReFi changed my approach to investing. The AI-powered recommendations helped me optimize my portfolio and I've seen a 22% increase in returns.",
     name: "Michael Chen",
     role: "Software Engineer",
     image: "/avatars/michael.jpg",
@@ -19,7 +19,7 @@ const testimonials = [
   },
   {
     quote:
-      "As someone who knew little about investing, WealthConnect made the process simple and approachable. Their financial advisors were incredibly helpful.",
+      "As someone who knew little about investing, ReFi made the process simple and approachable. Their financial advisors were incredibly helpful.",
     name: "Sarah Johnson",
     role: "Marketing Director",
     image: "/avatars/sarah.jpg",
@@ -35,7 +35,7 @@ const testimonials = [
   },
   {
     quote:
-      "I've tried other financial platforms, but WealthConnect's personalized approach and intuitive interface sets it apart. Highly recommend!",
+      "I've tried other financial platforms, but ReFi's personalized approach and intuitive interface sets it apart. Highly recommend!",
     name: "Emma Torres",
     role: "Healthcare Professional",
     image: "/avatars/emma.jpg",
@@ -43,7 +43,7 @@ const testimonials = [
   },
   {
     quote:
-      "The tax optimization strategies alone have saved me thousands. WealthConnect pays for itself many times over.",
+      "The tax optimization strategies alone have saved me thousands. ReFi pays for itself many times over.",
     name: "Robert Kim",
     role: "Freelance Consultant",
     image: "/avatars/robert.jpg",
@@ -63,7 +63,7 @@ export function Testimonials() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground">
-            See what our customers say about how WealthConnect has transformed
+            See what our customers say about how ReFi has transformed
             their financial lives.
           </p>
         </div>

@@ -24,7 +24,7 @@ export function Cta() {
               </span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Join thousands of investors who are already growing their wealth with WealthConnect.
+              Join thousands of investors who are already growing their wealth with ReFi.
             </p>
           </div>
           

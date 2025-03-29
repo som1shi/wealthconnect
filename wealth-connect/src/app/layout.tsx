@@ -4,8 +4,8 @@ import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 
 export const metadata: Metadata = {
-  title: "WealthConnect - Smart Finance for Modern Investors",
-  description: "WealthConnect combines AI-powered insights with human expertise to help you achieve financial freedom faster than ever before.",
+  title: "ReFi - Smart Finance for Everyonne",
+  description: "ReFicombines AI-powered insights with human expertise to help you achieve financial freedom faster than ever before.",
 };
 
 export default function RootLayout({

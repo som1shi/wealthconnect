@@ -11,7 +11,7 @@ export function Footer() {
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center mb-4">
               <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
-                WealthConnect
+                ReFi
               </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6">

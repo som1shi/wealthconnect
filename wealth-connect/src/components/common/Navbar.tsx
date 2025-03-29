@@ -14,7 +14,7 @@ export function Navbar() {
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
-              WealthConnect
+              ReFi
             </span>
           </Link>
           <div className="hidden md:flex gap-6">

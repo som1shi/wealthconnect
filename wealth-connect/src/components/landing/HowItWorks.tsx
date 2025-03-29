@@ -128,7 +128,7 @@ export function HowItWorks() {
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
             How{" "}
             <span className="bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
-              WealthConnect
+              ReFi
             </span>{" "}
             works
           </h2>

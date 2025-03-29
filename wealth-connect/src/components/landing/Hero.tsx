@@ -18,13 +18,13 @@ export function Hero() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="flex flex-col gap-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Smart finance for the{" "}
+              Smart finance for {" "}
               <span className="bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
                 Everyone
               </span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              WealthConnect combines AI-powered insights with human expertise to
+              ReFi combines AI-powered insights with human expertise to
               help you achieve financial freedom faster than ever before.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
