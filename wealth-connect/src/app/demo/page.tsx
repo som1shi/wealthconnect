@@ -23,11 +23,26 @@ export default function DemoPage() {
 
     setIsUploading(true);
     
-    setTimeout(() => {
+    try {
+      // Convert file to data URL for storage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Store file data in sessionStorage (will be cleared when browser is closed)
+        if (typeof reader.result === 'string') {
+          sessionStorage.setItem('uploadedFile', reader.result);
+        }
+        
+        // Store file name in localStorage
+        localStorage.setItem('uploadedFileName', file.name);
+        
+        // Redirect to processing page
+        window.location.href = '/demo/processing';
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error handling file:', error);
       setIsUploading(false);
-      setIsUploaded(true);
-    }, 1500);
-    
+    }
   };
 
   return (

@@ -1,486 +1,376 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 
-const DebtBreakdownDetails = () => (
-  <div className="space-y-6">
-    {/* Mini Pie Chart */}
-    <div className="flex justify-center mb-6">
-      <div className="relative h-40 w-40">
-        {/* Student Loans - 50% */}
-        <div className="absolute inset-0">
-          <svg viewBox="0 0 36 36" className="h-40 w-40">
-            <path
-              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke="#60a5fa"
-              strokeWidth="3"
-              strokeDasharray="50, 100"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        
-        {/* Credit Cards - 22% */}
-        <div className="absolute inset-0">
-          <svg viewBox="0 0 36 36" className="h-40 w-40">
-            <path
-              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke="#5eead4"
-              strokeWidth="3"
-              strokeDasharray="22, 100"
-              strokeDashoffset="-50"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        
-        {/* Auto Loan - 28% */}
-        <div className="absolute inset-0">
-          <svg viewBox="0 0 36 36" className="h-40 w-40">
-            <path
-              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke="#a78bfa"
-              strokeWidth="3"
-              strokeDasharray="28, 100"
-              strokeDashoffset="-72"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        
-        {/* Center text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm font-semibold">Total Debt</p>
-            <p className="text-xl font-bold">$24,850</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    {/* Legend */}
-    <div className="flex justify-center gap-4 mb-6">
-      <div className="flex items-center gap-1">
-        <div className="h-3 w-3 rounded-full bg-blue-400"></div>
-        <span className="text-xs">Student Loans</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="h-3 w-3 rounded-full bg-teal-400"></div>
-        <span className="text-xs">Credit Cards</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="h-3 w-3 rounded-full bg-purple-400"></div>
-        <span className="text-xs">Auto Loan</span>
-      </div>
-    </div>
-    
-    <Tabs defaultValue="breakdown" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-2">
-        <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-        <TabsTrigger value="progress">Progress</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="breakdown" className="space-y-3">
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Student Loans</span>
-            <span className="text-sm font-medium">$12,500</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-400 h-2 rounded-full" style={{ width: "50%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>50% of total</span>
-            <span>Interest: 5.8%</span>
-          </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Credit Cards</span>
-            <span className="text-sm font-medium">$5,350</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-teal-400 h-2 rounded-full" style={{ width: "22%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>22% of total</span>
-            <span>Interest: 18.9%</span>
-          </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Auto Loan</span>
-            <span className="text-sm font-medium">$7,000</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-purple-400 h-2 rounded-full" style={{ width: "28%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>28% of total</span>
-            <span>Interest: 4.2%</span>
-          </div>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="progress" className="space-y-3">
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Student Loans</span>
-            <span className="text-sm font-medium">45% paid</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-400 h-2 rounded-full" style={{ width: "45%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$10,200 paid</span>
-            <span>$12,500 remaining</span>
-          </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Credit Cards</span>
-            <span className="text-sm font-medium">20% paid</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-teal-400 h-2 rounded-full" style={{ width: "20%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$1,350 paid</span>
-            <span>$5,350 remaining</span>
-          </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Auto Loan</span>
-            <span className="text-sm font-medium">60% paid</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-purple-400 h-2 rounded-full" style={{ width: "60%" }}></div>
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$10,500 paid</span>
-            <span>$7,000 remaining</span>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
-  </div>
-);
-
-const RefinanceDetails = () => (
-  <div className="space-y-6">
-    {/* Savings Bar Chart */}
-    <div className="flex flex-col space-y-2">
-      <div className="text-center text-sm font-medium mb-2">Potential Interest Savings</div>
-      <div className="relative h-28 flex items-end gap-2 border-b border-gray-200 pt-2 pb-4">
-        {/* Current Rates */}
-        <div className="flex flex-col items-center gap-1 flex-1">
-          <div className="w-full bg-red-200 dark:bg-red-900/30 h-20 rounded-t-sm relative flex items-center justify-center">
-            <span className="absolute text-xs font-medium">$4,980</span>
-          </div>
-          <span className="text-xs pt-1">Current</span>
-        </div>
-        
-        {/* Refinanced Rates */}
-        <div className="flex flex-col items-center gap-1 flex-1">
-          <div className="w-full bg-green-200 dark:bg-green-900/30 h-12 rounded-t-sm relative flex items-center justify-center">
-            <span className="absolute text-xs font-medium">$2,850</span>
-          </div>
-          <span className="text-xs pt-1">Refinanced</span>
-        </div>
-        
-        {/* Savings */}
-        <div className="flex flex-col items-center gap-1 flex-1">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="h-16 w-[2px] bg-dashed bg-gray-300 dark:bg-gray-600 relative">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 absolute -top-2 -right-2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium text-green-600 mt-1">$2,130</span>
-            <span className="text-xs text-green-600">saved</span>
-          </div>
-          <span className="text-xs pt-1">Savings</span>
-        </div>
-      </div>
-    </div>
-    
-    <Tabs defaultValue="student" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-2">
-        <TabsTrigger value="student">Student Loan</TabsTrigger>
-        <TabsTrigger value="credit">Credit Card</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="student" className="space-y-4">
-        <div className="p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-800">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                <path d="M20 7h-9"></path>
-                <path d="M14 17H5"></path>
-                <circle cx="17" cy="17" r="3"></circle>
-                <circle cx="7" cy="7" r="3"></circle>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium">Rate Drop Alert: Student Loan</h4>
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>Current rate: 6.8%</span> 
-                <span>Available rate: 4.5%</span>
-              </div>
-              
-              <div className="mt-3 mb-2">
-                <div className="text-xs mb-1">Loan term: <span className="font-medium">10 years</span></div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs">5</span>
-                  <div className="flex-1">
-                    <Slider defaultValue={10} max={20} step={1} className="w-full" />
-                  </div>
-                  <span className="text-xs">20</span>
-                </div>
-              </div>
-              
-              <div className="flex justify-between text-xs mt-2">
-                <span>Monthly payment: <span className="font-medium">$144 → $130</span></span>
-                <span className="text-green-600 font-medium">Save $2,450</span>
-              </div>
-              
-              <Button size="sm" className="w-full mt-3 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
-                See Pre-qualified Rates
-              </Button>
-            </div>
-          </div>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="credit" className="space-y-4">
-        <div className="p-3 border rounded-lg bg-teal-50 dark:bg-teal-900/20">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-teal-100 dark:bg-teal-800">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600">
-                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                <line x1="1" y1="10" x2="23" y2="10"></line>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium">Balance Transfer Opportunity</h4>
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>Current rate: 18.9% APR</span>
-                <span>Offer: 0% APR</span>
-              </div>
-              
-              <div className="bg-white dark:bg-neutral-800 rounded-md p-2 mt-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs">Transfer amount:</span>
-                  <span className="text-xs font-medium">$5,350</span>
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs">Monthly payment:</span>
-                  <span className="text-xs font-medium">$297/mo</span>
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs">Promotion period:</span>
-                  <span className="text-xs font-medium">18 months</span>
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs">Transfer fee:</span>
-                  <span className="text-xs font-medium">$160 (3%)</span>
-                </div>
-                <div className="border-t mt-2 pt-2 flex items-center justify-between">
-                  <span className="text-xs font-medium">Net savings:</span>
-                  <span className="text-xs font-medium text-green-600">$680</span>
-                </div>
-              </div>
-              
-              <Button size="sm" className="w-full mt-3 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
-                Apply for Transfer
-              </Button>
-            </div>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
-  </div>
-);
-
-const FinancialInsightsDetails = () => (
-  <div className="space-y-6">
-    <Tabs defaultValue="snowball" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-2">
-        <TabsTrigger value="snowball">Debt Snowball</TabsTrigger>
-        <TabsTrigger value="budget">Budget Rule</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="snowball" className="space-y-4">
-        <div className="relative overflow-hidden rounded-lg border">
-          <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
-                  <line x1="19" y1="5" x2="5" y2="19"></line>
-                  <circle cx="6.5" cy="6.5" r="2.5"></circle>
-                  <circle cx="17.5" cy="17.5" r="2.5"></circle>
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Debt Snowball Method</h4>
-                <p className="text-xs text-muted-foreground">Pay off smaller debts first to build momentum and motivation.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-3">
-            <div className="flex justify-between mb-2">
-              <span className="text-xs font-medium">Your debt payoff order:</span>
-              <span className="text-xs text-blue-600 cursor-pointer hover:underline">Why this works</span>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-xs font-medium">1</span>
-                <div className="flex-1 flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                  <span className="text-xs font-medium">Credit Card</span>
-                  <span className="text-xs">$5,350</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-xs font-medium">2</span>
-                <div className="flex-1 flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                  <span className="text-xs font-medium">Auto Loan</span>
-                  <span className="text-xs">$7,000</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-xs font-medium">3</span>
-                <div className="flex-1 flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                  <span className="text-xs font-medium">Student Loans</span>
-                  <span className="text-xs">$12,500</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <div className="text-xs">
-                  Using this method, you&apos;ll be debt-free <span className="font-medium">7 months sooner</span> and save <span className="font-medium">$840</span> in interest!
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="budget" className="space-y-4">
-        <div className="relative overflow-hidden rounded-lg border">
-          <div className="p-3 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  <polyline points="3.29 7 12 12 20.71 7"></polyline>
-                  <line x1="12" y1="22" x2="12" y2="12"></line>
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">50/30/20 Budget Rule</h4>
-                <p className="text-xs text-muted-foreground">Allocate 50% to needs, 30% to wants, and 20% to savings & debt.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-3">
-            <div className="text-xs mb-2">Monthly income: <span className="font-medium">$4,500</span></div>
-            
-            {/* Interactive budget chart */}
-            <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex overflow-hidden">
-              <div className="bg-blue-400 h-full flex items-center justify-center" style={{ width: "50%" }}>
-                <span className="text-xs font-medium text-white">Needs<br/>$2,250</span>
-              </div>
-              <div className="bg-purple-400 h-full flex items-center justify-center" style={{ width: "30%" }}>
-                <span className="text-xs font-medium text-white">Wants<br/>$1,350</span>
-              </div>
-              <div className="bg-green-400 h-full flex items-center justify-center" style={{ width: "20%" }}>
-                <span className="text-xs font-medium text-white">Savings<br/>$900</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                  <span className="text-xs">Needs</span>
-                </div>
-                <div className="text-xs">
-                  Housing, utilities, groceries, transportation, insurance
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-                  <span className="text-xs">Wants</span>
-                </div>
-                <div className="text-xs">
-                  Dining out, entertainment, shopping, subscriptions
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  <span className="text-xs">Savings & Debt</span>
-                </div>
-                <div className="text-xs">
-                  Emergency fund, retirement, extra debt payments
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <div className="text-xs">
-                  Putting an extra <span className="font-medium">$250/month</span> toward debt can save you <span className="font-medium">$1,850</span> in interest over time!
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
-  </div>
-);
-
 export default function DemoDashboard() {
+  const [debtData, setDebtData] = useState({
+    studentLoans: {
+      totalAmount: 12500,
+      interestRate: 5.8,
+      monthlyPayment: 350,
+      paidAmount: 10200,
+      remainingAmount: 12500,
+      percentPaid: 45
+    },
+    creditCards: {
+      totalAmount: 5350,
+      interestRate: 18.9,
+      monthlyPayment: 125,
+      paidAmount: 1350,
+      remainingAmount: 5350,
+      percentPaid: 20
+    },
+    autoLoan: {
+      totalAmount: 7000,
+      interestRate: 4.2,
+      monthlyPayment: 400,
+      paidAmount: 10500,
+      remainingAmount: 7000,
+      percentPaid: 60
+    }
+  });
+  
+  const [totalDebt, setTotalDebt] = useState(24850);
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
+
+  useEffect(() => {
+    // Check if we have debt data from the processing page
+    const storedDebtData = localStorage.getItem('debtData');
+    if (storedDebtData) {
+      const parsedData = JSON.parse(storedDebtData);
+      setDebtData(parsedData);
+      
+      // Calculate total debt
+      const total = parsedData.studentLoans.totalAmount + 
+                    parsedData.creditCards.totalAmount + 
+                    parsedData.autoLoan.totalAmount;
+      setTotalDebt(total);
+      
+      // Mark that data has been updated
+      setIsDataUpdated(true);
+      
+      // Clear the stored data to prevent showing the highlight on refresh
+      setTimeout(() => {
+        localStorage.removeItem('debtData');
+        setIsDataUpdated(false);
+      }, 5000);
+    }
+  }, []);
+
+  // Calculate percentages for the pie chart
+  const studentLoanPercent = Math.round((debtData.studentLoans.totalAmount / totalDebt) * 100);
+  const creditCardPercent = Math.round((debtData.creditCards.totalAmount / totalDebt) * 100);
+  const autoLoanPercent = Math.round((debtData.autoLoan.totalAmount / totalDebt) * 100);
+
+  // Add a notification component for data updates
+  const DataUpdateNotification = () => {
+    if (!isDataUpdated) return null;
+    
+    return (
+      <div className="fixed top-20 right-4 bg-green-100 dark:bg-green-900/40 border border-green-200 dark:border-green-800 rounded-lg p-4 shadow-lg max-w-sm">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-full bg-green-200 dark:bg-green-800">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium">Dashboard Updated</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Your financial data has been successfully processed and your dashboard has been updated.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Add the missing RefinanceDetails component
+  const RefinanceDetails = () => {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Refinance Options</h3>
+        <p className="text-sm text-muted-foreground">
+          Based on your current debt profile, you may be eligible for these refinancing options.
+        </p>
+        
+        <div className="space-y-4 mt-4">
+          {/* Credit Card Refinance Option */}
+          <div className="border rounded-lg p-3">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h4 className="font-medium text-sm">Credit Card Consolidation</h4>
+                <p className="text-xs text-muted-foreground">Personal Loan</p>
+              </div>
+              <div className="bg-green-100 dark:bg-green-900/30 text-green-700 text-xs px-2 py-1 rounded-full">
+                Save $1,240
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Current: 18.9%</span>
+                  <span className="font-medium">New: 8.5%</span>
+                </div>
+                <div className="w-full bg-gray-200 h-1.5 rounded-full">
+                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "55%" }}></div>
+                </div>
+              </div>
+            </div>
+            <Button size="sm" className="w-full mt-2 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
+              Apply Now
+            </Button>
+          </div>
+          
+          {/* Student Loan Refinance Option */}
+          <div className="border rounded-lg p-3">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h4 className="font-medium text-sm">Student Loan Refinance</h4>
+                <p className="text-xs text-muted-foreground">Fixed Rate</p>
+              </div>
+              <div className="bg-green-100 dark:bg-green-900/30 text-green-700 text-xs px-2 py-1 rounded-full">
+                Save $850
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Current: 5.8%</span>
+                  <span className="font-medium">New: 4.2%</span>
+                </div>
+                <div className="w-full bg-gray-200 h-1.5 rounded-full">
+                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "28%" }}></div>
+                </div>
+              </div>
+            </div>
+            <Button size="sm" className="w-full mt-2 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
+              Apply Now
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const DebtBreakdownDetails = () => (
+    <div className="space-y-6">
+      {/* Mini Pie Chart */}
+      <div className="flex justify-center mb-6">
+        <div className="relative h-40 w-40">
+          {/* Student Loans */}
+          <div className="absolute inset-0">
+            <svg viewBox="0 0 36 36" className="h-40 w-40">
+              <path
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#60a5fa"
+                strokeWidth="3"
+                strokeDasharray={`${studentLoanPercent}, 100`}
+                strokeLinecap="round"
+                className={isDataUpdated ? "animate-pulse" : ""}
+              />
+            </svg>
+          </div>
+          
+          {/* Credit Cards */}
+          <div className="absolute inset-0">
+            <svg viewBox="0 0 36 36" className="h-40 w-40">
+              <path
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#5eead4"
+                strokeWidth="3"
+                strokeDasharray={`${creditCardPercent}, 100`}
+                strokeDashoffset={`-${studentLoanPercent}`}
+                strokeLinecap="round"
+                className={isDataUpdated ? "animate-pulse" : ""}
+              />
+            </svg>
+          </div>
+          
+          {/* Auto Loan */}
+          <div className="absolute inset-0">
+            <svg viewBox="0 0 36 36" className="h-40 w-40">
+              <path
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#a78bfa"
+                strokeWidth="3"
+                strokeDasharray={`${autoLoanPercent}, 100`}
+                strokeDashoffset={`-${studentLoanPercent + creditCardPercent}`}
+                strokeLinecap="round"
+                className={isDataUpdated ? "animate-pulse" : ""}
+              />
+            </svg>
+          </div>
+          
+          {/* Center text */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-sm font-semibold">Total Debt</p>
+              <p className={`text-xl font-bold ${isDataUpdated ? "text-blue-600" : ""}`}>
+                ${totalDebt.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Legend */}
+      <div className="flex justify-center gap-4 mb-6">
+        <div className="flex items-center gap-1">
+          <div className="h-3 w-3 rounded-full bg-blue-400"></div>
+          <span className="text-xs">Student Loans</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="h-3 w-3 rounded-full bg-teal-400"></div>
+          <span className="text-xs">Credit Cards</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="h-3 w-3 rounded-full bg-purple-400"></div>
+          <span className="text-xs">Auto Loan</span>
+        </div>
+      </div>
+      
+      <Tabs defaultValue="breakdown" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
+          <TabsTrigger value="progress">Progress</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="breakdown" className="space-y-3">
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Student Loans</span>
+              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+                ${debtData.studentLoans.totalAmount.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-blue-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${studentLoanPercent}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{studentLoanPercent}% of total</span>
+              <span>Interest: {debtData.studentLoans.interestRate}%</span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Credit Cards</span>
+              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+                ${debtData.creditCards.totalAmount.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-teal-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${creditCardPercent}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{creditCardPercent}% of total</span>
+              <span>Interest: {debtData.creditCards.interestRate}%</span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Auto Loan</span>
+              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+                ${debtData.autoLoan.totalAmount.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-purple-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${autoLoanPercent}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{autoLoanPercent}% of total</span>
+              <span>Interest: {debtData.autoLoan.interestRate}%</span>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="progress" className="space-y-3">
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Student Loans</span>
+              <span className="text-sm font-medium">{debtData.studentLoans.percentPaid}% paid</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-blue-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${debtData.studentLoans.percentPaid}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>${debtData.studentLoans.paidAmount.toLocaleString()} paid</span>
+              <span>${debtData.studentLoans.remainingAmount.toLocaleString()} remaining</span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Credit Cards</span>
+              <span className="text-sm font-medium">{debtData.creditCards.percentPaid}% paid</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-teal-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${debtData.creditCards.percentPaid}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>${debtData.creditCards.paidAmount.toLocaleString()} paid</span>
+              <span>${debtData.creditCards.remainingAmount.toLocaleString()} remaining</span>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Auto Loan</span>
+              <span className="text-sm font-medium">{debtData.autoLoan.percentPaid}% paid</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`bg-purple-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
+                style={{ width: `${debtData.autoLoan.percentPaid}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>${debtData.autoLoan.paidAmount.toLocaleString()} paid</span>
+              <span>${debtData.autoLoan.remainingAmount.toLocaleString()} remaining</span>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      {/* Show notification when data is updated */}
+      <DataUpdateNotification />
+      
       {/* Top Navigation */}
       <nav className="border-b bg-background sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -783,7 +673,95 @@ export default function DemoDashboard() {
                 <h3 className="font-semibold">Financial Insights</h3>
               </div>
               <div className="p-4">
-                <FinancialInsightsDetails />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Debt Breakdown</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Your current debt distribution.
+                  </p>
+                  
+                  <div className="flex justify-center mb-6">
+                    <div className="relative h-40 w-40">
+                      {/* Student Loans */}
+                      <div className="absolute inset-0">
+                        <svg viewBox="0 0 36 36" className="h-40 w-40">
+                          <path
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="#60a5fa"
+                            strokeWidth="3"
+                            strokeDasharray={`${studentLoanPercent}, 100`}
+                            strokeLinecap="round"
+                            className={isDataUpdated ? "animate-pulse" : ""}
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Credit Cards */}
+                      <div className="absolute inset-0">
+                        <svg viewBox="0 0 36 36" className="h-40 w-40">
+                          <path
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="#5eead4"
+                            strokeWidth="3"
+                            strokeDasharray={`${creditCardPercent}, 100`}
+                            strokeDashoffset={`-${studentLoanPercent}`}
+                            strokeLinecap="round"
+                            className={isDataUpdated ? "animate-pulse" : ""}
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Auto Loan */}
+                      <div className="absolute inset-0">
+                        <svg viewBox="0 0 36 36" className="h-40 w-40">
+                          <path
+                            d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="#a78bfa"
+                            strokeWidth="3"
+                            strokeDasharray={`${autoLoanPercent}, 100`}
+                            strokeDashoffset={`-${studentLoanPercent + creditCardPercent}`}
+                            strokeLinecap="round"
+                            className={isDataUpdated ? "animate-pulse" : ""}
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Center text */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <p className="text-sm font-semibold">Total Debt</p>
+                          <p className={`text-xl font-bold ${isDataUpdated ? "text-blue-600" : ""}`}>
+                            ${totalDebt.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Legend */}
+                  <div className="flex justify-center gap-4 mb-6">
+                    <div className="flex items-center gap-1">
+                      <div className="h-3 w-3 rounded-full bg-blue-400"></div>
+                      <span className="text-xs">Student Loans</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="h-3 w-3 rounded-full bg-teal-400"></div>
+                      <span className="text-xs">Credit Cards</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="h-3 w-3 rounded-full bg-purple-400"></div>
+                      <span className="text-xs">Auto Loan</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Card>
             
