@@ -45,8 +45,11 @@ export function Navbar() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex">
-            <Button asChild className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600">
+          <div className="hidden md:flex gap-2">
+            <Button asChild variant="outline">
+              <Link href="/demo">Try Demo</Link>
+            </Button>
+            <Button asChild className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
               <Link href="/waitlist">Join Waitlist</Link>
             </Button>
           </div>
@@ -83,6 +86,9 @@ export function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/about">About</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/demo">Try Demo</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/waitlist">Join Waitlist</Link>
