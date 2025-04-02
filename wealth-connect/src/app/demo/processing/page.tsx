@@ -13,12 +13,10 @@ let pdfjsLib: any;
 
 // Initialize PDF.js only on client side
 if (typeof window !== 'undefined') {
-  import('pdfjs-dist').then((pdf) => {
+  import('pdfjs-dist/build/pdf').then((pdf) => {
     pdfjsLib = pdf;
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.js',
-      import.meta.url,
-    ).toString();
+    // Update worker source path
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdf.version}/pdf.worker.min.js`;
   });
 }
 
@@ -31,36 +29,61 @@ const calculatePercentPaid = (paidAmount: number, totalAmount: number): number =
   return Math.round((paidAmount / totalAmount) * 100);
 };
 
-// mock data extraction results
+// Update mock data to start at 0
 const mockExtractionResults = {
   studentLoans: {
-    totalAmount: 12500,
-    interestRate: 5.8,
-    monthlyPayment: 350,
-    paidAmount: 10200,
-    remainingAmount: 12500,
-    percentPaid: 45
+    totalAmount: 0,
+    interestRate: 0,
+    monthlyPayment: 0,
+    paidAmount: 0,
+    remainingAmount: 0,
+    percentPaid: 0
   },
   creditCards: {
-    totalAmount: 5350,
-    interestRate: 18.9,
-    monthlyPayment: 125,
-    paidAmount: 1350,
-    remainingAmount: 5350,
-    percentPaid: 20
+    totalAmount: 0,
+    interestRate: 0,
+    monthlyPayment: 0,
+    paidAmount: 0,
+    remainingAmount: 0,
+    percentPaid: 0
   },
   autoLoan: {
-    totalAmount: 7000,
-    interestRate: 4.2,
-    monthlyPayment: 400,
-    paidAmount: 10500,
-    remainingAmount: 7000,
-    percentPaid: 60
+    totalAmount: 0,
+    interestRate: 0,
+    monthlyPayment: 0,
+    paidAmount: 0,
+    remainingAmount: 0,
+    percentPaid: 0
   }
 };
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
+
+// Add number animation function
+const animateNumber = (start: number, end: number, duration: number, setValue: (value: number) => void) => {
+  const frames = 60;
+  const stepDuration = duration / frames;
+  
+  // Use easeOutQuart easing function for smoother animation
+  const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
+  
+  let frame = 0;
+  const timer = setInterval(() => {
+    frame++;
+    const progress = frame / frames;
+    const easedProgress = easeOutQuart(progress);
+    const current = start + (end - start) * easedProgress;
+    
+    if (frame >= frames) {
+      setValue(end);
+      clearInterval(timer);
+      if (frame === frames) setIsAnimating(false);
+    } else {
+      setValue(current);
+    }
+  }, stepDuration);
+};
 
 // PDF text extraction and parsing helpers
 const extractTextFromPDF = async (pdfData: string): Promise<string> => {
@@ -214,7 +237,8 @@ const extractDataFromPDF = async (pdfData: string) => {
     const text = await extractTextFromPDF(pdfData);
     if (!text) {
       console.log("No text content found");
-      return null;
+      // Return mock data instead of null
+      return mockExtractionResults;
     }
 
     console.log("Extracted PDF text:", text); // Debug log
@@ -223,10 +247,16 @@ const extractDataFromPDF = async (pdfData: string) => {
     const parsedData = parseFinancialData(text);
     console.log("Parsed financial data:", parsedData); // Debug log
     
+    // If parsing failed, return mock data
+    if (!parsedData || Object.keys(parsedData).length === 0) {
+      return mockExtractionResults;
+    }
+    
     return parsedData;
   } catch (error) {
     console.error("Extraction error:", error);
-    return null;
+    // Return mock data on error
+    return mockExtractionResults;
   }
 };
 
@@ -239,6 +269,8 @@ export default function ProcessingPage() {
   const [processingComplete, setProcessingComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [animatedData, setAnimatedData] = useState(mockExtractionResults);
+  const [isAnimating, setIsAnimating] = useState(false); // Start as false instead of true
 
   // Add verification handlers
   const handleVerify = async (verified: boolean) => {
@@ -301,6 +333,33 @@ export default function ProcessingPage() {
     return validated;
   };
 
+  const animateExtractedData = (data: any) => {
+    setIsAnimating(true);
+    const animationPromises = Object.keys(data).map((category) => {
+      return new Promise<void>((resolve) => {
+        Object.keys(data[category]).forEach((field) => {
+          const endValue = data[category][field];
+          animateNumber(0, endValue, 1500, (value) => {
+            setAnimatedData((prev) => ({
+              ...prev,
+              [category]: {
+                ...prev[category],
+                [field]: Math.round(value * 100) / 100
+              }
+            }));
+          });
+        });
+        // Resolve after the animation duration
+        setTimeout(resolve, 1500);
+      });
+    });
+
+    // When all animations are complete, enable the verify buttons
+    Promise.all(animationPromises).then(() => {
+      setIsAnimating(false);
+    });
+  };
+
   useEffect(() => {
     const processDocument = async () => {
       const pdfData = sessionStorage.getItem('uploadedFile');
@@ -335,6 +394,7 @@ export default function ProcessingPage() {
         
         setProcessingComplete(true);
         setIsVerifying(true);
+        setIsAnimating(false); // Enable verify buttons after data is extracted
       } catch (error) {
         console.error("Processing error:", error);
         setError(`Failed to process document: ${error.message}`);
@@ -541,28 +601,24 @@ export default function ProcessingPage() {
           </Card>
         </div>
 
-        {/* Debug Information - only show in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-            <h4 className="text-sm font-medium mb-2">Debug Information:</h4>
-            <pre className="text-xs overflow-auto">
-              {JSON.stringify(extractedData, null, 2)}
-            </pre>
-          </div>
-        )}
-
         {/* Verification buttons */}
         <div className="mt-8 flex flex-col items-center space-y-4">
           <Button
             onClick={() => handleVerify(true)}
-            className="w-full max-w-md bg-green-600 hover:bg-green-700"
+            disabled={!extractedData} // Only disable if no data is extracted
+            className={`w-full max-w-md bg-green-600 hover:bg-green-700 ${
+              !extractedData ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             ✓ I Verify This Information is Correct
           </Button>
           <Button
             onClick={() => handleVerify(false)}
+            disabled={!extractedData} // Only disable if no data is extracted
             variant="outline"
-            className="w-full max-w-md"
+            className={`w-full max-w-md ${
+              !extractedData ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             ✗ This Information is Incorrect
           </Button>

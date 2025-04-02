@@ -1,10 +1,55 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
+
+const sampleStatements = [
+  {
+    name: "Financial Statement 1",
+    description: "Sample financial statement with student loans",
+    path: "/sample-statements/statement1.pdf",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M16 13H8" />
+        <path d="M16 17H8" />
+        <path d="M10 9H8" />
+      </svg>
+    ),
+  },
+  {
+    name: "Financial Statement 2",
+    description: "Sample financial statement with credit cards",
+    path: "/sample-statements/statement2.pdf",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M16 13H8" />
+        <path d="M16 17H8" />
+        <path d="M10 9H8" />
+      </svg>
+    ),
+  },
+  {
+    name: "Financial Statement 3",
+    description: "Sample financial statement with auto loans",
+    path: "/sample-statements/statement3.pdf",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M16 13H8" />
+        <path d="M16 17H8" />
+        <path d="M10 9H8" />
+      </svg>
+    ),
+  },
+];
 
 export default function DemoPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -14,6 +59,28 @@ export default function DemoPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handleSampleFileSelect = async (path: string) => {
+    try {
+      setIsUploading(true);
+      const response = await fetch(path);
+      const blob = await response.blob();
+      const fileName = path.split('/').pop() || 'sample.pdf';
+      
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = reader.result as string;
+        sessionStorage.setItem('uploadedFile', base64Data);
+        localStorage.setItem('uploadedFileName', fileName);
+        window.location.href = '/demo/processing';
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Error loading sample file:', error);
+      setIsUploading(false);
     }
   };
 
@@ -47,8 +114,8 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto">
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto">
         {isUploaded ? (
           <Card className="border bg-background shadow-lg">
             <CardHeader>
@@ -79,11 +146,43 @@ export default function DemoPage() {
             <CardHeader>
               <CardTitle className="text-2xl text-center">Try Our Demo</CardTitle>
               <CardDescription className="text-center mt-2">
-                Upload a financial document to see how our debt management tools can help you.
+                Upload a financial document or try one of our sample statements.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Sample Statements Section */}
+              <div className="mb-8">
+                <h3 className="text-lg font-medium mb-4">Sample Statements</h3>
+                <div className="grid gap-4">
+                  {sampleStatements.map((statement, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center p-4 border rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors"
+                      onClick={() => handleSampleFileSelect(statement.path)}
+                    >
+                      <div className="mr-4">
+                        {statement.icon}
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{statement.name}</h4>
+                        <p className="text-sm text-muted-foreground">{statement.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or upload your own</span>
+                </div>
+              </div>
+
+              {/* Your existing file upload form */}
+              <form onSubmit={handleSubmit} className="space-y-4 mt-8">
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-muted-foreground">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

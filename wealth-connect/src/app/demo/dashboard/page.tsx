@@ -7,350 +7,478 @@ import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 
-export default function DemoDashboard() {
-  const [debtData, setDebtData] = useState({
-    studentLoans: {
-      totalAmount: 12500,
-      interestRate: 5.8,
-      monthlyPayment: 350,
-      paidAmount: 10200,
-      remainingAmount: 12500,
-      percentPaid: 45
-    },
-    creditCards: {
-      totalAmount: 5350,
-      interestRate: 18.9,
-      monthlyPayment: 125,
-      paidAmount: 1350,
-      remainingAmount: 5350,
-      percentPaid: 20
-    },
-    autoLoan: {
-      totalAmount: 7000,
-      interestRate: 4.2,
-      monthlyPayment: 400,
-      paidAmount: 10500,
-      remainingAmount: 7000,
-      percentPaid: 60
-    }
-  });
-  
-  const [totalDebt, setTotalDebt] = useState(24850);
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
+interface DebtData {
+  totalAmount: number;
+  interestRate: number;
+  monthlyPayment: number;
+  paidAmount: number;
+  remainingAmount: number;
+  percentPaid: number;
+}
+
+interface SummaryMetricsType {
+  totalDebt: number;
+  monthlyChange: number;
+  monthlyPayment: number;
+  nextPaymentDate: string;
+  debtFreeDate: string;
+  yearsRemaining: number;
+  interestSaved: number;
+  interestSavedChange: number;
+}
+
+// Add UpdateNotification component
+const UpdateNotification = () => {
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Check if we have debt data from the processing page
-    const storedDebtData = localStorage.getItem('debtData');
-    if (storedDebtData) {
-      const parsedData = JSON.parse(storedDebtData);
-      setDebtData(parsedData);
+    const isUpdated = localStorage.getItem('dataUpdated');
+    if (isUpdated === 'true') {
+      setShow(true);
+      localStorage.removeItem('dataUpdated');
       
-      // Calculate total debt
-      const total = parsedData.studentLoans.totalAmount + 
-                    parsedData.creditCards.totalAmount + 
-                    parsedData.autoLoan.totalAmount;
-      setTotalDebt(total);
-      
-      // Mark that data has been updated
-      setIsDataUpdated(true);
-      
-      // Clear the stored data to prevent showing the highlight on refresh
-      setTimeout(() => {
-        localStorage.removeItem('debtData');
-        setIsDataUpdated(false);
+      // Hide notification after 5 seconds
+      const timer = setTimeout(() => {
+        setShow(false);
       }, 5000);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 
-  // Add notification component for updates
-  const UpdateNotification = () => {
-    if (!isDataUpdated) return null;
+  if (!show) return null;
 
-    return (
-      <div className="fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-        <strong className="font-bold">Updated! </strong>
-        <span className="block sm:inline">Your financial information has been updated based on the uploaded document.</span>
+  return (
+    <div className="fixed top-4 right-4 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-2 rounded-lg shadow-lg z-50">
+      <div className="flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>Data updated successfully!</span>
+        <button onClick={() => setShow(false)} className="text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-100">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  // Calculate percentages for the pie chart
-  const studentLoanPercent = Math.round((debtData.studentLoans.totalAmount / totalDebt) * 100);
-  const creditCardPercent = Math.round((debtData.creditCards.totalAmount / totalDebt) * 100);
-  const autoLoanPercent = Math.round((debtData.autoLoan.totalAmount / totalDebt) * 100);
+// Add RefinanceDetails component before the main DashboardPage component
+const RefinanceDetails = () => {
+  const refinanceOptions = [
+    {
+      lender: "SoFi",
+      type: "Student Loan Refinancing",
+      rate: "4.25%",
+      monthlySavings: 85,
+      totalSavings: 5200,
+      terms: "5-15 years"
+    },
+    {
+      lender: "LendingClub",
+      type: "Credit Card Consolidation",
+      rate: "8.99%",
+      monthlySavings: 120,
+      totalSavings: 3600,
+      terms: "3-5 years"
+    },
+    {
+      lender: "Earnest",
+      type: "Student Loan Refinancing",
+      rate: "4.45%",
+      monthlySavings: 75,
+      totalSavings: 4800,
+      terms: "5-20 years"
+    }
+  ];
 
-  // Add the missing RefinanceDetails component
-  const RefinanceDetails = () => {
-    return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Refinance Options</h3>
-        <p className="text-sm text-muted-foreground">
-          Based on your current debt profile, you may be eligible for these refinancing options.
-        </p>
-        
-        <div className="space-y-4 mt-4">
-          {/* Credit Card Refinance Option */}
-          <div className="border rounded-lg p-3">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h4 className="font-medium text-sm">Credit Card Consolidation</h4>
-                <p className="text-xs text-muted-foreground">Personal Loan</p>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900/30 text-green-700 text-xs px-2 py-1 rounded-full">
-                Save $1,240
-              </div>
+  return (
+    <div className="space-y-4">
+      {refinanceOptions.map((option, index) => (
+        <div key={index} className="border rounded-lg p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h3 className="font-medium">{option.lender}</h3>
+              <p className="text-sm text-muted-foreground">{option.type}</p>
             </div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span>Current: 18.9%</span>
-                  <span className="font-medium">New: 8.5%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-1.5 rounded-full">
-                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "55%" }}></div>
-                </div>
-              </div>
+            <div className="text-right">
+              <p className="font-medium">{option.rate}</p>
+              <p className="text-sm text-muted-foreground">Fixed APR</p>
             </div>
-            <Button size="sm" className="w-full mt-2 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
-              Apply Now
-            </Button>
           </div>
-          
-          {/* Student Loan Refinance Option */}
-          <div className="border rounded-lg p-3">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h4 className="font-medium text-sm">Student Loan Refinance</h4>
-                <p className="text-xs text-muted-foreground">Fixed Rate</p>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900/30 text-green-700 text-xs px-2 py-1 rounded-full">
-                Save $850
-              </div>
+          <div className="flex justify-between items-center mt-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Monthly Savings</p>
+              <p className="font-medium text-green-600">${option.monthlySavings}</p>
             </div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span>Current: 5.8%</span>
-                  <span className="font-medium">New: 4.2%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-1.5 rounded-full">
-                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "28%" }}></div>
-                </div>
-              </div>
+            <div className="space-y-1 text-right">
+              <p className="text-sm text-muted-foreground">Total Savings</p>
+              <p className="font-medium text-green-600">${option.totalSavings}</p>
             </div>
-            <Button size="sm" className="w-full mt-2 bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
-              Apply Now
+          </div>
+          <div className="mt-4">
+            <Button variant="outline" className="w-full">
+              View Details
             </Button>
           </div>
         </div>
-      </div>
-    );
+      ))}
+    </div>
+  );
+};
+
+export default function DashboardPage() {
+  const [debtData, setDebtData] = useState<Record<string, DebtData>>({
+    studentLoans: {
+      totalAmount: 0,
+      interestRate: 0,
+      monthlyPayment: 0,
+      paidAmount: 0,
+      remainingAmount: 0,
+      percentPaid: 0
+    },
+    creditCards: {
+      totalAmount: 0,
+      interestRate: 0,
+      monthlyPayment: 0,
+      paidAmount: 0,
+      remainingAmount: 0,
+      percentPaid: 0
+    },
+    autoLoan: {
+      totalAmount: 0,
+      interestRate: 0,
+      monthlyPayment: 0,
+      paidAmount: 0,
+      remainingAmount: 0,
+      percentPaid: 0
+    }
+  });
+  const [summaryMetrics, setSummaryMetrics] = useState<SummaryMetricsType>({
+    totalDebt: 0,
+    monthlyChange: 0,
+    monthlyPayment: 0,
+    nextPaymentDate: '',
+    debtFreeDate: '',
+    yearsRemaining: 0,
+    interestSaved: 0,
+    interestSavedChange: 0
+  });
+
+  // Add the calculateTotalDebt function
+  const calculateTotalDebt = () => {
+    if (!debtData.studentLoans) return 0;
+    
+    return debtData.studentLoans.totalAmount + 
+           debtData.creditCards.totalAmount + 
+           debtData.autoLoan.totalAmount;
   };
 
-  const DebtBreakdownDetails = () => (
-    <div className="space-y-6">
-      {/* Mini Pie Chart */}
-      <div className="flex justify-center mb-6">
-        <div className="relative h-40 w-40">
+  useEffect(() => {
+    // Try to get data from both localStorage keys
+    const pdfData = localStorage.getItem('pdfDebtData');
+    const regularData = localStorage.getItem('debtData');
+    
+    let extractedData;
+    
+    if (pdfData) {
+      try {
+        extractedData = JSON.parse(pdfData);
+      } catch (error) {
+        console.error('Error parsing PDF data:', error);
+      }
+    } else if (regularData) {
+      try {
+        extractedData = JSON.parse(regularData);
+      } catch (error) {
+        console.error('Error parsing regular data:', error);
+      }
+    }
+
+    if (extractedData) {
+      const formattedData: Record<string, DebtData> = {
+        studentLoans: {
+          totalAmount: extractedData.studentLoans?.totalAmount || 15750,
+          interestRate: extractedData.studentLoans?.interestRate || 5.25,
+          monthlyPayment: extractedData.studentLoans?.monthlyPayment || 225,
+          paidAmount: extractedData.studentLoans?.amountPaid || 8450,
+          remainingAmount: extractedData.studentLoans?.remaining || 7300,
+          percentPaid: Math.round(((extractedData.studentLoans?.amountPaid || 8450) / (extractedData.studentLoans?.totalAmount || 15750)) * 100)
+        },
+        creditCards: {
+          totalAmount: extractedData.creditCards?.totalAmount || 3875,
+          interestRate: extractedData.creditCards?.interestRate || 16.99,
+          monthlyPayment: extractedData.creditCards?.monthlyPayment || 95,
+          paidAmount: extractedData.creditCards?.amountPaid || 950,
+          remainingAmount: extractedData.creditCards?.remaining || 2925,
+          percentPaid: Math.round(((extractedData.creditCards?.amountPaid || 950) / (extractedData.creditCards?.totalAmount || 3875)) * 100)
+        },
+        autoLoan: {
+          totalAmount: extractedData.autoLoan?.totalAmount || 28500,
+          interestRate: extractedData.autoLoan?.interestRate || 3.75,
+          monthlyPayment: extractedData.autoLoan?.monthlyPayment || 485,
+          paidAmount: extractedData.autoLoan?.amountPaid || 12650,
+          remainingAmount: extractedData.autoLoan?.remaining || 15850,
+          percentPaid: Math.round(((extractedData.autoLoan?.amountPaid || 12650) / (extractedData.autoLoan?.totalAmount || 28500)) * 100)
+        }
+      };
+
+      setDebtData(formattedData);
+
+      // Calculate summary metrics
+      const totalDebt = formattedData.studentLoans.totalAmount + 
+                       formattedData.creditCards.totalAmount + 
+                       formattedData.autoLoan.totalAmount;
+
+      const monthlyPayment = formattedData.studentLoans.monthlyPayment +
+                            formattedData.creditCards.monthlyPayment +
+                            formattedData.autoLoan.monthlyPayment;
+
+      const weightedRate = (
+        (formattedData.studentLoans.totalAmount * formattedData.studentLoans.interestRate +
+         formattedData.creditCards.totalAmount * formattedData.creditCards.interestRate +
+         formattedData.autoLoan.totalAmount * formattedData.autoLoan.interestRate) / totalDebt
+      );
+
+      const totalRemaining = formattedData.studentLoans.remainingAmount +
+                            formattedData.creditCards.remainingAmount +
+                            formattedData.autoLoan.remainingAmount;
+
+      const months = Math.ceil(totalRemaining / monthlyPayment);
+
+      const nextPaymentDate = new Date();
+      nextPaymentDate.setDate(15);
+      nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+
+      const debtFreeDate = new Date();
+      debtFreeDate.setMonth(debtFreeDate.getMonth() + months);
+
+      setSummaryMetrics({
+        totalDebt,
+        monthlyChange: -monthlyPayment,
+        monthlyPayment,
+        nextPaymentDate: nextPaymentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }),
+        debtFreeDate: debtFreeDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        yearsRemaining: Math.round((months / 12) * 10) / 10,
+        interestSaved: Math.round(totalDebt * (weightedRate/100) * 0.15),
+        interestSavedChange: Math.round(monthlyPayment * (weightedRate/1200))
+      });
+    }
+  }, []);
+
+  const calculatePercentages = () => {
+    if (!debtData.studentLoans) return { studentLoanPercent: 0, creditCardPercent: 0, autoLoanPercent: 0 };
+    
+    const total = calculateTotalDebt(); // Use the function here instead of repeating the calculation
+
+    return {
+      studentLoanPercent: Math.round((debtData.studentLoans.totalAmount / total) * 100),
+      creditCardPercent: Math.round((debtData.creditCards.totalAmount / total) * 100),
+      autoLoanPercent: Math.round((debtData.autoLoan.totalAmount / total) * 100)
+    };
+  };
+
+  const { studentLoanPercent, creditCardPercent, autoLoanPercent } = calculatePercentages();
+
+  const DebtBreakdownDetails = () => {
+    // Return early if data is not loaded
+    if (!debtData.studentLoans || !debtData.creditCards || !debtData.autoLoan) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          Loading debt breakdown...
+        </div>
+      );
+    }
+
+    const total = calculateTotalDebt();
+    
+    return (
+      <div className="space-y-6">
+        {/* Mini Pie Chart */}
+        <div className="flex justify-center mb-6">
+          <div className="relative h-40 w-40">
+            {/* Student Loans */}
+            <div className="absolute inset-0">
+              <svg viewBox="0 0 36 36" className="h-40 w-40">
+                <path
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="#60a5fa"
+                  strokeWidth="3"
+                  strokeDasharray={`${studentLoanPercent}, 100`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            
+            {/* Credit Cards */}
+            <div className="absolute inset-0">
+              <svg viewBox="0 0 36 36" className="h-40 w-40">
+                <path
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="#5eead4"
+                  strokeWidth="3"
+                  strokeDasharray={`${creditCardPercent}, 100`}
+                  strokeDashoffset={`-${studentLoanPercent}`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            
+            {/* Auto Loan */}
+            <div className="absolute inset-0">
+              <svg viewBox="0 0 36 36" className="h-40 w-40">
+                <path
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="#a78bfa"
+                  strokeWidth="3"
+                  strokeDasharray={`${autoLoanPercent}, 100`}
+                  strokeDashoffset={`-${studentLoanPercent + creditCardPercent}`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            
+            {/* Center text */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-sm font-semibold">Total Debt</p>
+                <p className="text-xl font-bold">
+                  ${total.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Debt Breakdown Details */}
+        <div className="space-y-4">
           {/* Student Loans */}
-          <div className="absolute inset-0">
-            <svg viewBox="0 0 36 36" className="h-40 w-40">
-              <path
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#60a5fa"
-                strokeWidth="3"
-                strokeDasharray={`${studentLoanPercent}, 100`}
-                strokeLinecap="round"
-                className={isDataUpdated ? "animate-pulse" : ""}
-              />
-            </svg>
-          </div>
-          
-          {/* Credit Cards */}
-          <div className="absolute inset-0">
-            <svg viewBox="0 0 36 36" className="h-40 w-40">
-              <path
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#5eead4"
-                strokeWidth="3"
-                strokeDasharray={`${creditCardPercent}, 100`}
-                strokeDashoffset={`-${studentLoanPercent}`}
-                strokeLinecap="round"
-                className={isDataUpdated ? "animate-pulse" : ""}
-              />
-            </svg>
-          </div>
-          
-          {/* Auto Loan */}
-          <div className="absolute inset-0">
-            <svg viewBox="0 0 36 36" className="h-40 w-40">
-              <path
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="#a78bfa"
-                strokeWidth="3"
-                strokeDasharray={`${autoLoanPercent}, 100`}
-                strokeDashoffset={`-${studentLoanPercent + creditCardPercent}`}
-                strokeLinecap="round"
-                className={isDataUpdated ? "animate-pulse" : ""}
-              />
-            </svg>
-          </div>
-          
-          {/* Center text */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-sm font-semibold">Total Debt</p>
-              <p className={`text-xl font-bold ${isDataUpdated ? "text-blue-600" : ""}`}>
-                ${totalDebt.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Legend */}
-      <div className="flex justify-center gap-4 mb-6">
-        <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-full bg-blue-400"></div>
-          <span className="text-xs">Student Loans</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-full bg-teal-400"></div>
-          <span className="text-xs">Credit Cards</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="h-3 w-3 rounded-full bg-purple-400"></div>
-          <span className="text-xs">Auto Loan</span>
-        </div>
-      </div>
-      
-      <Tabs defaultValue="breakdown" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-2">
-          <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="breakdown" className="space-y-3">
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-sm font-medium">Student Loans</span>
-              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+              <span className="text-sm font-medium">
                 ${debtData.studentLoans.totalAmount.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className={`bg-blue-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${studentLoanPercent}%` }}
+                className="bg-blue-400 h-2 rounded-full" 
+                style={{ width: `${(debtData.studentLoans.totalAmount / total * 100).toFixed(1)}%` }}
               ></div>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{studentLoanPercent}% of total</span>
+              <span>{(debtData.studentLoans.totalAmount / total * 100).toFixed(1)}% of total</span>
               <span>Interest: {debtData.studentLoans.interestRate}%</span>
             </div>
           </div>
-          
+
+          {/* Credit Cards */}
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-sm font-medium">Credit Cards</span>
-              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+              <span className="text-sm font-medium">
                 ${debtData.creditCards.totalAmount.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className={`bg-teal-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${creditCardPercent}%` }}
+                className="bg-teal-400 h-2 rounded-full" 
+                style={{ width: `${(debtData.creditCards.totalAmount / total * 100).toFixed(1)}%` }}
               ></div>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{creditCardPercent}% of total</span>
+              <span>{(debtData.creditCards.totalAmount / total * 100).toFixed(1)}% of total</span>
               <span>Interest: {debtData.creditCards.interestRate}%</span>
             </div>
           </div>
-          
+
+          {/* Auto Loan */}
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-sm font-medium">Auto Loan</span>
-              <span className={`text-sm font-medium ${isDataUpdated ? "text-blue-600" : ""}`}>
+              <span className="text-sm font-medium">
                 ${debtData.autoLoan.totalAmount.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className={`bg-purple-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${autoLoanPercent}%` }}
+                className="bg-purple-400 h-2 rounded-full" 
+                style={{ width: `${(debtData.autoLoan.totalAmount / total * 100).toFixed(1)}%` }}
               ></div>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{autoLoanPercent}% of total</span>
+              <span>{(debtData.autoLoan.totalAmount / total * 100).toFixed(1)}% of total</span>
               <span>Interest: {debtData.autoLoan.interestRate}%</span>
             </div>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="progress" className="space-y-3">
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium">Student Loans</span>
-              <span className="text-sm font-medium">{debtData.studentLoans.percentPaid}% paid</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`bg-blue-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${debtData.studentLoans.percentPaid}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>${debtData.studentLoans.paidAmount.toLocaleString()} paid</span>
-              <span>${debtData.studentLoans.remainingAmount.toLocaleString()} remaining</span>
-            </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Add the SummaryMetrics component
+  const SummaryMetrics = () => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <Card className="p-4">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Total Debt</h3>
+          <div className="text-2xl font-bold">
+            ${(summaryMetrics?.totalDebt || 0).toLocaleString()}
           </div>
-          
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium">Credit Cards</span>
-              <span className="text-sm font-medium">{debtData.creditCards.percentPaid}% paid</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`bg-teal-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${debtData.creditCards.percentPaid}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>${debtData.creditCards.paidAmount.toLocaleString()} paid</span>
-              <span>${debtData.creditCards.remainingAmount.toLocaleString()} remaining</span>
-            </div>
+          <p className="text-sm text-muted-foreground">
+            ${Math.abs(summaryMetrics?.monthlyChange || 0).toLocaleString()} since last month
+          </p>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Monthly Payment</h3>
+          <div className="text-2xl font-bold">
+            ${(summaryMetrics?.monthlyPayment || 0).toLocaleString()}
           </div>
-          
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium">Auto Loan</span>
-              <span className="text-sm font-medium">{debtData.autoLoan.percentPaid}% paid</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`bg-purple-400 h-2 rounded-full ${isDataUpdated ? "animate-pulse" : ""}`} 
-                style={{ width: `${debtData.autoLoan.percentPaid}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>${debtData.autoLoan.paidAmount.toLocaleString()} paid</span>
-              <span>${debtData.autoLoan.remainingAmount.toLocaleString()} remaining</span>
-            </div>
+          <p className="text-sm text-muted-foreground">
+            Next payment: {summaryMetrics?.nextPaymentDate || 'N/A'}
+          </p>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Debt-Free Date</h3>
+          <div className="text-2xl font-bold">
+            {summaryMetrics?.debtFreeDate || 'N/A'}
           </div>
-        </TabsContent>
-      </Tabs>
+          <p className="text-sm text-muted-foreground">
+            {summaryMetrics?.yearsRemaining || 0} years remaining
+          </p>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Interest Saved</h3>
+          <div className="text-2xl font-bold">
+            ${(summaryMetrics?.interestSaved || 0).toLocaleString()}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            ${summaryMetrics?.interestSavedChange || 0} since last month
+          </p>
+        </div>
+      </Card>
     </div>
   );
 
@@ -477,85 +605,7 @@ export default function DemoDashboard() {
             </div>
             
             {/* Financial Summary Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Card className="p-4 border bg-background">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Total Debt</h3>
-                    <p className="text-2xl font-bold mt-1">$24,850</p>
-                    <p className="text-xs text-green-600 flex items-center mt-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                      </svg>
-                      $750 since last month
-                    </p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="1" x2="12" y2="23"></line>
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card className="p-4 border bg-background">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Monthly Payment</h3>
-                    <p className="text-2xl font-bold mt-1">$875</p>
-                    <p className="text-xs text-muted-foreground mt-1">Next payment: June 15</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card className="p-4 border bg-background">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Debt-Free Date</h3>
-                    <p className="text-2xl font-bold mt-1">Mar 2026</p>
-                    <p className="text-xs text-muted-foreground mt-1">2.8 years remaining</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                      <line x1="4" y1="22" x2="4" y2="15"></line>
-                    </svg>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card className="p-4 border bg-background">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Interest Saved</h3>
-                    <p className="text-2xl font-bold mt-1">$3,219</p>
-                    <p className="text-xs text-green-600 flex items-center mt-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                      </svg>
-                      $120 since last month
-                    </p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                      <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                    </svg>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <SummaryMetrics />
             
             {/* Demo Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -681,7 +731,6 @@ export default function DemoDashboard() {
                             strokeWidth="3"
                             strokeDasharray={`${studentLoanPercent}, 100`}
                             strokeLinecap="round"
-                            className={isDataUpdated ? "animate-pulse" : ""}
                           />
                         </svg>
                       </div>
@@ -699,7 +748,6 @@ export default function DemoDashboard() {
                             strokeDasharray={`${creditCardPercent}, 100`}
                             strokeDashoffset={`-${studentLoanPercent}`}
                             strokeLinecap="round"
-                            className={isDataUpdated ? "animate-pulse" : ""}
                           />
                         </svg>
                       </div>
@@ -717,7 +765,6 @@ export default function DemoDashboard() {
                             strokeDasharray={`${autoLoanPercent}, 100`}
                             strokeDashoffset={`-${studentLoanPercent + creditCardPercent}`}
                             strokeLinecap="round"
-                            className={isDataUpdated ? "animate-pulse" : ""}
                           />
                         </svg>
                       </div>
@@ -726,8 +773,8 @@ export default function DemoDashboard() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
                           <p className="text-sm font-semibold">Total Debt</p>
-                          <p className={`text-xl font-bold ${isDataUpdated ? "text-blue-600" : ""}`}>
-                            ${totalDebt.toLocaleString()}
+                          <p className="text-xl font-bold">
+                            ${calculateTotalDebt().toLocaleString()}
                           </p>
                         </div>
                       </div>
