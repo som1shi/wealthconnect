@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  CheckSquare,
+} from "lucide-react";
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
 
 interface DebtData {
   totalAmount: number;
@@ -481,6 +487,32 @@ export default function DashboardPage() {
     </div>
   );
 
+  // Community highlight component
+  const CommunityHighlight = () => {
+    return (
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">
+            Community Highlights
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 text-sm">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-primary/10 p-2">
+              <CheckSquare className="h-4 w-4 text-primary" />
+            </div>
+            <div className="grid gap-1">
+              <p className="font-medium">Magali paid off 25% of their loan</p>
+              <p className="text-muted-foreground">
+                &quot;I&apos;ve been making consistent extra payments through your auto loan term. It&apos;s amazing to see the progress!&quot;
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       {/* Show notification when data is updated */}
@@ -858,31 +890,7 @@ export default function DashboardPage() {
                 <h3 className="font-semibold">Community Highlights</h3>
               </div>
               <div className="p-4">
-                <div className="border rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                    <span className="font-medium text-sm">Sarah J.</span>
-                  </div>
-                  <p className="text-sm">"Just made my final student loan payment! The snowball method really worked for me."</p>
-                  <div className="flex items-center gap-3 mt-2 text-muted-foreground text-xs">
-                    <span className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                      </svg>
-                      42
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                      </svg>
-                      15
-                    </span>
-                  </div>
-                </div>
-                
-                <Button variant="outline" className="w-full mt-4">
-                  Join the Community
-                </Button>
+                <CommunityHighlight />
               </div>
             </Card>
           </div>
