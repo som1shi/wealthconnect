@@ -24,21 +24,22 @@ export default function DemoPage() {
     setIsUploading(true);
     
     try {
-      // Convert file to data URL for storage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // Store file data in sessionStorage (will be cleared when browser is closed)
-        if (typeof reader.result === 'string') {
-          sessionStorage.setItem('uploadedFile', reader.result);
-        }
-        
-        // Store file name in localStorage
-        localStorage.setItem('uploadedFileName', file.name);
-        
-        // Redirect to processing page
-        window.location.href = '/demo/processing';
-      };
-      reader.readAsDataURL(file);
+      // Read file as Data URL (this automatically handles base64 encoding)
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      
+      // Store the base64 data (it's already in the correct format)
+      sessionStorage.setItem('uploadedFile', base64Data);
+      localStorage.setItem('uploadedFileName', file.name);
+      
+      window.location.href = '/demo/processing';
     } catch (error) {
       console.error('Error handling file:', error);
       setIsUploading(false);
