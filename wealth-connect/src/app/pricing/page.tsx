@@ -66,7 +66,7 @@ export default function PricingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {plans.map((plan, index) => (
+            {plans.map((plan) => (
               <div 
                 key={plan.name}
                 className={`relative p-8 rounded-2xl border ${

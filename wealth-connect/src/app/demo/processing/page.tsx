@@ -416,7 +416,8 @@ export default function ProcessingPage() {
     };
 
     processDocument();
-  }, []); // Empty dependency array as we only want to run this once
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (error) {
     return (

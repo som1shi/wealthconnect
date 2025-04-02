@@ -15,10 +15,10 @@ export default function AboutPage() {
             <section>
               <h2 className="text-3xl font-semibold mb-6 bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">Our Mission</h2>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                At ReFi, we're revolutionizing wealth building through cutting-edge technology. 
+                At ReFi, we&apos;re revolutionizing wealth building through cutting-edge technology. 
                 Our mission is to democratize access to sophisticated financial tools and strategies, 
                 making professional-grade investment capabilities available to everyone. We believe that 
-                financial prosperity shouldn't be limited by traditional barriers - it should be 
+                financial prosperity shouldn&apos;t be limited by traditional barriers - it should be 
                 accessible to all who seek it.
               </p>
             </section>
@@ -68,7 +68,7 @@ export default function AboutPage() {
               <div className="max-w-2xl mx-auto">
                 <h2 className="text-3xl font-semibold mb-6">Join Our Journey</h2>
                 <p className="text-lg text-muted-foreground mb-8">
-                  We're always looking for passionate individuals who share our vision 
+                  We&apos;re always looking for passionate individuals who share our vision 
                   of making financial freedom accessible to everyone.
                 </p>
                 <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
