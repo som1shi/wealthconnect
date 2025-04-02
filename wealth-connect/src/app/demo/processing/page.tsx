@@ -1,640 +1,139 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import dynamic from 'next/dynamic';
-
-// Dynamically import pdf.js
-let pdfjsLib: any;
-
-// Initialize PDF.js only on client side
-if (typeof window !== 'undefined') {
-  import('pdfjs-dist/build/pdf').then((pdf) => {
-    pdfjsLib = pdf;
-    // Update worker source path
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdf.version}/pdf.worker.min.js`;
-  });
-}
-
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-
-// Helper function to calculate percentage paid
-const calculatePercentPaid = (paidAmount: number, totalAmount: number): number => {
-  if (totalAmount === 0) return 0;
-  return Math.round((paidAmount / totalAmount) * 100);
-};
-
-// Update mock data to start at 0
-const mockExtractionResults = {
-  studentLoans: {
-    totalAmount: 0,
-    interestRate: 0,
-    monthlyPayment: 0,
-    paidAmount: 0,
-    remainingAmount: 0,
-    percentPaid: 0
-  },
-  creditCards: {
-    totalAmount: 0,
-    interestRate: 0,
-    monthlyPayment: 0,
-    paidAmount: 0,
-    remainingAmount: 0,
-    percentPaid: 0
-  },
-  autoLoan: {
-    totalAmount: 0,
-    interestRate: 0,
-    monthlyPayment: 0,
-    paidAmount: 0,
-    remainingAmount: 0,
-    percentPaid: 0
-  }
-};
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
-
-// Add number animation function
-const animateNumber = (start: number, end: number, duration: number, setValue: (value: number) => void) => {
-  const frames = 60;
-  const stepDuration = duration / frames;
-  
-  // Use easeOutQuart easing function for smoother animation
-  const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
-  
-  let frame = 0;
-  const timer = setInterval(() => {
-    frame++;
-    const progress = frame / frames;
-    const easedProgress = easeOutQuart(progress);
-    const current = start + (end - start) * easedProgress;
-    
-    if (frame >= frames) {
-      setValue(end);
-      clearInterval(timer);
-      if (frame === frames) setIsAnimating(false);
-    } else {
-      setValue(current);
-    }
-  }, stepDuration);
-};
-
-// PDF text extraction and parsing helpers
-const extractTextFromPDF = async (pdfData: string): Promise<string> => {
-  try {
-    // Check if pdfjsLib is loaded
-    if (!pdfjsLib) {
-      console.log("PDF.js library not loaded yet");
-      return '';
-    }
-
-    // Check if it's a base64 PDF
-    if (!pdfData.includes('base64,')) {
-      console.error('Invalid PDF data format');
-      return '';
-    }
-
-    // Get the base64 content
-    const base64Content = pdfData.split('base64,')[1];
-    
-    // Convert base64 to binary
-    const binaryStr = atob(base64Content);
-    
-    // Create a Uint8Array from the binary string
-    const len = binaryStr.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryStr.charCodeAt(i);
-    }
-
-    // Load the PDF using pdf.js
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
-    
-    // Extract text from all pages
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item: any) => item.str).join(' ');
-      fullText += pageText + ' ';
-    }
-
-    return fullText.trim();
-  } catch (error) {
-    console.error('PDF extraction error:', error);
-    return '';
-  }
-};
-
-const extractTotalAmountFromPDF = (text: string): number | null => {
-  // Look for patterns like "$12,500" or "12500" near keywords
-  const amountRegex = /\$?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/;
-  const keywordMatches = text.match(
-    new RegExp(`(total amount|balance|principal).*?${amountRegex.source}`, 'i')
-  );
-  
-  if (keywordMatches) {
-    const amount = keywordMatches[0].match(amountRegex)![1];
-    return parseFloat(amount.replace(/,/g, ''));
-  }
-  return null;
-};
-
-// PDF parsing helpers
-const extractNumberFromText = (text: string, pattern: RegExp): number | null => {
-  const match = text.match(pattern);
-  console.log(`Extracting number with pattern ${pattern}:`, match); // Debug log
-  if (match && match[1]) {
-    const value = parseFloat(match[1].replace(/[,$]/g, ''));
-    console.log("Extracted value:", value);
-    return value;
-  }
-  return null;
-};
-
-const extractPercentFromText = (text: string, pattern: RegExp): number | null => {
-  const match = text.match(pattern);
-  if (match && match[1]) {
-    return parseFloat(match[1]);
-  }
-  return null;
-};
-
-const parseFinancialData = (text: string) => {
-  // Debug logs
-  console.log("Starting financial data parsing");
-  
-  // Student Loans parsing
-  const studentLoanSection = text.match(/STUDENT LOANS([\s\S]*?)(?=CREDIT CARD ACCOUNTS|$)/i)?.[1] || '';
-  console.log("Student Loan Section:", studentLoanSection);
-
-  const studentLoans = {
-    totalAmount: extractNumberFromText(studentLoanSection, /Original Loan Amount:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    interestRate: extractPercentFromText(studentLoanSection, /Current Interest Rate:?\s*([\d.]+)%/i),
-    monthlyPayment: extractNumberFromText(studentLoanSection, /Monthly Payment:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    paidAmount: extractNumberFromText(studentLoanSection, /(?:Total )?Amount Paid to Date:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    remainingAmount: extractNumberFromText(studentLoanSection, /Remaining Balance:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-  };
-
-  // Credit Cards parsing
-  const creditCardSection = text.match(/CREDIT CARD ACCOUNTS([\s\S]*?)(?=AUTO LOAN|$)/i)?.[1] || '';
-  console.log("Credit Card Section:", creditCardSection);
-
-  const creditCards = {
-    totalAmount: extractNumberFromText(creditCardSection, /Total Credit Card Balance:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    interestRate: extractPercentFromText(creditCardSection, /APR:?\s*([\d.]+)%/i),
-    monthlyPayment: extractNumberFromText(creditCardSection, /Minimum Monthly Payment:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    paidAmount: extractNumberFromText(creditCardSection, /Payments Made Year to Date:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    remainingAmount: extractNumberFromText(creditCardSection, /Current Balance:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-  };
-
-  // Auto Loan parsing
-  const autoLoanSection = text.match(/AUTO LOAN([\s\S]*?)$/i)?.[1] || '';
-  console.log("Auto Loan Section:", autoLoanSection);
-
-  const autoLoan = {
-    totalAmount: extractNumberFromText(autoLoanSection, /Original Loan Amount:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    interestRate: extractPercentFromText(autoLoanSection, /Current Interest Rate:?\s*([\d.]+)%/i),
-    monthlyPayment: extractNumberFromText(autoLoanSection, /Monthly Payment:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    paidAmount: extractNumberFromText(autoLoanSection, /Amount Paid to Date:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-    remainingAmount: extractNumberFromText(autoLoanSection, /Remaining Balance:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
-  };
-
-  // Calculate percentages
-  const calculatePercentPaid = (paid: number | null, total: number | null) => {
-    if (!paid || !total || total === 0) return 0;
-    return Math.round((paid / total) * 100);
-  };
-
-  const result = {
-    studentLoans: {
-      ...studentLoans,
-      percentPaid: calculatePercentPaid(studentLoans.paidAmount, studentLoans.totalAmount)
-    },
-    creditCards: {
-      ...creditCards,
-      percentPaid: calculatePercentPaid(creditCards.paidAmount, creditCards.totalAmount)
-    },
-    autoLoan: {
-      ...autoLoan,
-      percentPaid: calculatePercentPaid(autoLoan.paidAmount, autoLoan.totalAmount)
-    }
-  };
-
-  console.log("Final parsed result:", result);
-  return result;
-};
-
-const extractDataFromPDF = async (pdfData: string) => {
-  try {
-    // Extract text from PDF
-    const text = await extractTextFromPDF(pdfData);
-    if (!text) {
-      console.log("No text content found");
-      // Return mock data instead of null
-      return mockExtractionResults;
-    }
-
-    console.log("Extracted PDF text:", text); // Debug log
-
-    // Parse the financial data
-    const parsedData = parseFinancialData(text);
-    console.log("Parsed financial data:", parsedData); // Debug log
-    
-    // If parsing failed, return mock data
-    if (!parsedData || Object.keys(parsedData).length === 0) {
-      return mockExtractionResults;
-    }
-    
-    return parsedData;
-  } catch (error) {
-    console.error("Extraction error:", error);
-    // Return mock data on error
-    return mockExtractionResults;
-  }
-};
+import Link from "next/link";
 
 export default function ProcessingPage() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
   const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState("initializing");
-  const [extractedData, setExtractedData] = useState(null);
-  const [fileName, setFileName] = useState("");
-  const [processingComplete, setProcessingComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [animatedData, setAnimatedData] = useState(mockExtractionResults);
-  const [isAnimating, setIsAnimating] = useState(false); // Start as false instead of true
-
-  // Add verification handlers
-  const handleVerify = async (verified: boolean) => {
-    if (verified) {
-      // Store the verified data
-      const dataToStore = extractedData || mockExtractionResults;
-      
-      // Calculate total debt
-      const totalDebt = 
-        dataToStore.studentLoans.totalAmount +
-        dataToStore.creditCards.totalAmount +
-        dataToStore.autoLoan.totalAmount;
-
-      // Store both the detailed data and the total
-      localStorage.setItem('debtData', JSON.stringify({
-        ...dataToStore,
-        totalDebt
-      }));
-      
-      // Mark as newly updated for the dashboard
-      localStorage.setItem('dataUpdated', 'true');
-      
-      // Navigate to dashboard
-      router.push('/demo/dashboard');
-    } else {
-      // Reset the process and go back to upload
-      sessionStorage.removeItem('uploadedFile');
-      localStorage.removeItem('uploadedFileName');
-      router.push('/demo');
-    }
-  };
-
-  // Enhanced validation function
-  const validateData = (data: any, type: 'studentLoans' | 'creditCards' | 'autoLoan') => {
-    const defaultData = mockExtractionResults[type];
-    
-    if (!data) {
-      console.warn(`No data provided for ${type}, using default`);
-      return defaultData;
-    }
-
-    const validated = {
-      totalAmount: Math.max(parseFloat(data?.totalAmount) || 0, 0),
-      interestRate: Math.max(parseFloat(data?.interestRate) || 0, 0),
-      monthlyPayment: Math.max(parseFloat(data?.monthlyPayment) || 0, 0),
-      paidAmount: Math.max(parseFloat(data?.paidAmount) || 0, 0),
-      remainingAmount: Math.max(parseFloat(data?.remainingAmount) || 0, 0),
-      percentPaid: 0
-    };
-
-    // If any required field is missing or invalid, use default data
-    if (validated.totalAmount === 0 || validated.interestRate === 0 || validated.monthlyPayment === 0) {
-      console.warn(`Invalid data for ${type}, using default:`, data);
-      return defaultData;
-    }
-
-    // Calculate percent paid
-    validated.percentPaid = calculatePercentPaid(validated.paidAmount, validated.totalAmount);
-
-    return validated;
-  };
-
-  const animateExtractedData = (data: any) => {
-    setIsAnimating(true);
-    const animationPromises = Object.keys(data).map((category) => {
-      return new Promise<void>((resolve) => {
-        Object.keys(data[category]).forEach((field) => {
-          const endValue = data[category][field];
-          animateNumber(0, endValue, 1500, (value) => {
-            setAnimatedData((prev) => ({
-              ...prev,
-              [category]: {
-                ...prev[category],
-                [field]: Math.round(value * 100) / 100
-              }
-            }));
-          });
-        });
-        // Resolve after the animation duration
-        setTimeout(resolve, 1500);
-      });
-    });
-
-    // When all animations are complete, enable the verify buttons
-    Promise.all(animationPromises).then(() => {
-      setIsAnimating(false);
-    });
-  };
-
+  
+  // Simulate processing steps
   useEffect(() => {
-    const processDocument = async () => {
-      const pdfData = sessionStorage.getItem('uploadedFile');
-      const uploadedFileName = localStorage.getItem('uploadedFileName') || "document.pdf";
-      setFileName(uploadedFileName);
-
-      if (!pdfData) {
-        setError("No document found. Please upload a document first.");
-        return;
+    // Define the stages of processing
+    const processingSteps = [
+      { step: 1, duration: 1000, progress: 15 },
+      { step: 2, duration: 2000, progress: 35 },
+      { step: 3, duration: 1500, progress: 60 },
+      { step: 4, duration: 2000, progress: 80 },
+      { step: 5, duration: 1500, progress: 100 }
+    ];
+    
+    // Process each step in sequence
+    const processSteps = async () => {
+      for (const step of processingSteps) {
+        await new Promise(resolve => setTimeout(resolve, step.duration));
+        setCurrentStep(step.step);
+        setProgress(step.progress);
       }
-
-      try {
-        console.log("Starting document processing...");
-        setCurrentStep("initializing");
-        await incrementProgress(0, 20);
+      
+      // After all steps, redirect to the dashboard
+      setTimeout(() => {
+        // Save mock data to localStorage
+        const mockData = {
+          studentLoans: {
+            totalAmount: 15750,
+            interestRate: 5.25,
+            monthlyPayment: 225,
+            amountPaid: 8450,
+            remaining: 7300
+          },
+          creditCards: {
+            totalAmount: 3875,
+            interestRate: 16.99,
+            monthlyPayment: 95,
+            amountPaid: 950,
+            remaining: 2925
+          },
+          autoLoan: {
+            totalAmount: 28500,
+            interestRate: 3.75,
+            monthlyPayment: 485,
+            amountPaid: 12650,
+            remaining: 15850
+          }
+        };
         
-        console.log("Analyzing document...");
-        setCurrentStep("analyzing");
-        await incrementProgress(20, 70);
-
-        const extractedData = await extractDataFromPDF(pdfData);
+        localStorage.setItem('pdfDebtData', JSON.stringify(mockData));
+        localStorage.setItem('dataUpdated', 'true');
         
-        if (!extractedData) {
-          throw new Error("Failed to extract data from document");
-        }
-
-        // Set the extracted data to state
-        setExtractedData(extractedData);
-        
-        setCurrentStep("finalizing");
-        await incrementProgress(70, 100);
-        
-        setProcessingComplete(true);
-        setIsVerifying(true);
-        setIsAnimating(false); // Enable verify buttons after data is extracted
-      } catch (error) {
-        console.error("Processing error:", error);
-        setError(`Failed to process document: ${error.message}`);
-        setProcessingComplete(false);
-      }
+        router.push('/demo/dashboard');
+      }, 1000);
     };
-
-    processDocument();
-  }, []);
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-red-600">Processing Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{error}</p>
-            <Button 
-              onClick={() => router.push('/demo')}
-              className="mt-4 w-full"
-            >
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Helper function to increment progress smoothly
-  const incrementProgress = async (from: number, to: number) => {
-    const step = (to - from) / 10;
-    for (let i = 0; i <= 10; i++) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      setProgress(Math.min(from + step * i, to));
-    }
-  };
+    
+    processSteps().catch(err => {
+      console.error("Processing error:", err);
+      setError("An error occurred while processing your document");
+    });
+    
+    // Cleanup function
+    return () => {
+      // Nothing to clean up
+    };
+  }, [router]);
   
-  // Function to render the current processing step
-  const renderProcessingStep = () => {
-    switch (currentStep) {
-      case "initializing":
-        return "Initializing document processor...";
-      case "loading":
-        return "Loading document into memory...";
-      case "ocr":
-        return "Performing OCR on document pages...";
-      case "extracting":
-        return "Extracting financial data from document...";
-      case "analyzing":
-        return "Analyzing debt information...";
-      case "finalizing":
-        return "Finalizing and preparing dashboard...";
-      default:
-        return "Processing document...";
-    }
-  };
+  // Step descriptions
+  const stepDescriptions = [
+    "Parsing document",
+    "Extracting financial data",
+    "Analyzing accounts",
+    "Finding savings opportunities",
+    "Preparing your dashboard"
+  ];
   
-  // Function to render the extracted data
-  const renderExtractedData = () => {
-    if (!extractedData) {
-      // Use mock data if no extracted data is available
-      return renderFinancialCards(mockExtractionResults);
-    }
-    return renderFinancialCards(extractedData);
-  };
-
-  // Separate function to render the financial cards with proper null checking
-  const renderFinancialCards = (data: any) => {
-    return (
-      <div className="mt-6 space-y-4">
-        <h3 className="text-lg font-medium">Extracted Financial Information</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Please verify that the following information is correct. If the information is incorrect, click "Data Incorrect" to try again.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Student Loans Card */}
-          <Card className="border bg-blue-50 dark:bg-blue-900/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Student Loans</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount:</span>
-                  <span className="font-medium">
-                    ${(data?.studentLoans?.totalAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Interest Rate:</span>
-                  <span className="font-medium">
-                    {(data?.studentLoans?.interestRate || 0)}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Monthly Payment:</span>
-                  <span className="font-medium">
-                    ${(data?.studentLoans?.monthlyPayment || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount Paid:</span>
-                  <span className="font-medium">
-                    ${(data?.studentLoans?.paidAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Remaining:</span>
-                  <span className="font-medium">
-                    ${(data?.studentLoans?.remainingAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <Progress value={data?.studentLoans?.percentPaid || 0} className="mt-2" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Credit Cards Card */}
-          <Card className="border bg-teal-50 dark:bg-teal-900/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Credit Cards</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount:</span>
-                  <span className="font-medium">
-                    ${(data?.creditCards?.totalAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Interest Rate:</span>
-                  <span className="font-medium">
-                    {(data?.creditCards?.interestRate || 0)}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Monthly Payment:</span>
-                  <span className="font-medium">
-                    ${(data?.creditCards?.monthlyPayment || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount Paid:</span>
-                  <span className="font-medium">
-                    ${(data?.creditCards?.paidAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Remaining:</span>
-                  <span className="font-medium">
-                    ${(data?.creditCards?.remainingAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <Progress value={data?.creditCards?.percentPaid || 0} className="mt-2" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Auto Loan Card */}
-          <Card className="border bg-purple-50 dark:bg-purple-900/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Auto Loan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount:</span>
-                  <span className="font-medium">
-                    ${(data?.autoLoan?.totalAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Interest Rate:</span>
-                  <span className="font-medium">
-                    {(data?.autoLoan?.interestRate || 0)}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Monthly Payment:</span>
-                  <span className="font-medium">
-                    ${(data?.autoLoan?.monthlyPayment || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount Paid:</span>
-                  <span className="font-medium">
-                    ${(data?.autoLoan?.paidAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Remaining:</span>
-                  <span className="font-medium">
-                    ${(data?.autoLoan?.remainingAmount || 0).toLocaleString()}
-                  </span>
-                </div>
-                <Progress value={data?.autoLoan?.percentPaid || 0} className="mt-2" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Verification buttons */}
-        <div className="mt-8 flex flex-col items-center space-y-4">
-          <Button
-            onClick={() => handleVerify(true)}
-            disabled={!extractedData} // Only disable if no data is extracted
-            className={`w-full max-w-md bg-green-600 hover:bg-green-700 ${
-              !extractedData ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            ✓ I Verify This Information is Correct
-          </Button>
-          <Button
-            onClick={() => handleVerify(false)}
-            disabled={!extractedData} // Only disable if no data is extracted
-            variant="outline"
-            className={`w-full max-w-md ${
-              !extractedData ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            ✗ This Information is Incorrect
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col items-center justify-center p-4">
+      <Card className="w-full max-w-md border bg-background">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Document Analysis Results</CardTitle>
+          <CardTitle className="text-center">Processing Your Document</CardTitle>
         </CardHeader>
-        <CardContent>
-          {renderExtractedData()}
+        <CardContent className="space-y-6">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-6">
+              Analyzing your financial data to unlock personalized recommendations
+            </p>
+            <Progress value={progress} className="h-2 mb-4" />
+            <p className="text-sm text-muted-foreground">Step {currentStep} of 5</p>
+          </div>
+          
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-md">
+              <p>{error}</p>
+              <Button asChild variant="outline" className="mt-4 w-full">
+                <Link href="/demo">Try Again</Link>
+              </Button>
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            {stepDescriptions.map((description, index) => (
+              <div key={index} className="relative">
+                <div className={`flex items-center space-x-2 ${currentStep >= index + 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <div className={`flex h-6 w-6 items-center justify-center rounded-full ${
+                    currentStep > index + 1 
+                      ? 'bg-primary text-white' 
+                      : currentStep === index + 1 
+                        ? 'bg-primary text-white'
+                        : 'border text-muted-foreground'
+                  }`}>
+                    {currentStep > index + 1 ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    ) : (
+                      <span>{index + 1}</span>
+                    )}
+                  </div>
+                  <span>{description}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
