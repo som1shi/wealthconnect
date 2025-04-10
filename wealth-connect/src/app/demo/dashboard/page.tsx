@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useEffect, useState } from "react";
 import {
@@ -189,58 +189,41 @@ export default function DashboardPage() {
     
     if (storedData) {
       try {
-        const extractedData = JSON.parse(storedData);
+        // Log what we're getting from localStorage for debugging
+        console.log("--- ORIGINAL DATA FROM LOCALSTORAGE ---");
+        console.log(storedData);
+        console.log("--- END OF ORIGINAL DATA ---");
         
-        // Format the data with realistic estimates for missing values
-        const formattedData: Record<string, DebtData> = {
-          studentLoans: {
-            totalAmount: extractedData.studentLoans?.totalAmount || 0,
-            interestRate: extractedData.studentLoans?.interestRate || 5.8,
-            monthlyPayment: extractedData.studentLoans?.monthlyPayment || (extractedData.studentLoans?.totalAmount * 0.015),
-            paidAmount: extractedData.studentLoans?.paidAmount || (extractedData.studentLoans?.totalAmount * 0.3),
-            remainingAmount: extractedData.studentLoans?.remainingAmount || (extractedData.studentLoans?.totalAmount * 0.7),
-            percentPaid: extractedData.studentLoans?.percentPaid || 30
-          },
-          creditCards: {
-            totalAmount: extractedData.creditCards?.totalAmount || 0,
-            interestRate: extractedData.creditCards?.interestRate || 18.99,
-            monthlyPayment: extractedData.creditCards?.monthlyPayment || (extractedData.creditCards?.totalAmount * 0.03),
-            paidAmount: extractedData.creditCards?.paidAmount || (extractedData.creditCards?.totalAmount * 0.25),
-            remainingAmount: extractedData.creditCards?.remainingAmount || (extractedData.creditCards?.totalAmount * 0.75),
-            percentPaid: extractedData.creditCards?.percentPaid || 25
-          },
-          autoLoan: {
-            totalAmount: extractedData.autoLoan?.totalAmount || 0,
-            interestRate: extractedData.autoLoan?.interestRate || 4.5,
-            monthlyPayment: extractedData.autoLoan?.monthlyPayment || (extractedData.autoLoan?.totalAmount * 0.02),
-            paidAmount: extractedData.autoLoan?.paidAmount || (extractedData.autoLoan?.totalAmount * 0.4),
-            remainingAmount: extractedData.autoLoan?.remainingAmount || (extractedData.autoLoan?.totalAmount * 0.6),
-            percentPaid: extractedData.autoLoan?.percentPaid || 40
-          }
-        };
-
-        setDebtData(formattedData);
-
-        // Calculate summary metrics using the calculateTotalDebt function
-        const totalDebt = Object.values(formattedData).reduce((sum, debt) => sum + debt.totalAmount, 0);
-        const monthlyPayment = Object.values(formattedData).reduce((sum, debt) => sum + debt.monthlyPayment, 0);
+        // Add proper type assertion here
+        const extractedData = JSON.parse(storedData) as Record<string, DebtData>;
+        
+        // Set the debt data state with the parsed data
+        setDebtData(extractedData);
+        
+        // Calculate summary metrics - TypeScript will now understand the types
+        const totalDebt = Object.values(extractedData).reduce((sum, debt) => 
+          sum + (debt?.totalAmount || 0), 0);
+        
+        const monthlyPayment = Object.values(extractedData).reduce((sum, debt) => 
+          sum + (debt?.monthlyPayment || 0), 0);
         
         // Calculate weighted average interest rate
         const weightedRate = totalDebt > 0 
-          ? Object.values(formattedData).reduce((sum, debt) => 
-              sum + (debt.totalAmount * debt.interestRate), 0) / totalDebt 
+          ? Object.values(extractedData).reduce((sum, debt) => 
+              sum + ((debt?.totalAmount || 0) * (debt?.interestRate || 0)), 0) / totalDebt 
           : 0;
 
-        // Calculate months remaining based on total remaining and monthly payments
-        const totalRemaining = Object.values(formattedData).reduce((sum, debt) => sum + debt.remainingAmount, 0);
+        // Calculate months remaining
+        const totalRemaining = Object.values(extractedData).reduce((sum, debt) => 
+          sum + (debt?.remainingAmount || 0), 0);
+        
         const months = monthlyPayment > 0 ? Math.ceil(totalRemaining / monthlyPayment) : 0;
 
-        // Calculate next payment date (15th of next month)
+        // Next payment date and debt-free date calculation
         const nextPaymentDate = new Date();
         nextPaymentDate.setDate(15);
         nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
 
-        // Calculate debt-free date
         const debtFreeDate = new Date();
         debtFreeDate.setMonth(debtFreeDate.getMonth() + months);
 
@@ -254,6 +237,13 @@ export default function DashboardPage() {
           interestSaved: Math.round(totalDebt * (weightedRate/100) * 0.15),
           interestSavedChange: Math.round(monthlyPayment * (weightedRate/1200))
         });
+
+        // Log the final calculated metrics
+        console.log("--- CALCULATED METRICS ---");
+        console.log("Total Debt:", totalDebt);
+        console.log("Monthly Payment:", monthlyPayment);
+        console.log("Interest Rate (weighted):", weightedRate);
+        console.log("--- END OF CALCULATED METRICS ---");
 
       } catch (error) {
         console.error('Error parsing debt data:', error);

@@ -52,64 +52,114 @@ const sampleStatements = [
 ];
 
 export default function DemoPage() {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[] | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState("");
   const [isUploaded, setIsUploaded] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      
+      setFiles((prevFiles) => (prevFiles ? [...prevFiles, ...newFiles] : newFiles));
+      
+      e.target.value = '';
     }
   };
 
   const handleSampleFileSelect = async (path: string) => {
     try {
       setIsUploading(true);
+      setProcessingStatus("Fetching sample file...");
+      
       const response = await fetch(path);
       const blob = await response.blob();
       const fileName = path.split('/').pop() || 'sample.pdf';
       
-      // Convert blob to base64
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Data = reader.result as string;
         sessionStorage.setItem('uploadedFile', base64Data);
         localStorage.setItem('uploadedFileName', fileName);
+        
         window.location.href = '/demo/processing';
       };
       reader.readAsDataURL(blob);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading sample file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Could not load sample file.';
+      setProcessingStatus(`Error: ${errorMessage}`);
       setIsUploading(false);
+      
+      setTimeout(() => {
+        setProcessingStatus("");
+      }, 3000);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!file) return;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
+    setIsProcessing(true);
+    setProcessingStatus("Reading files...");
     
     try {
-      // Read file as Data URL (this automatically handles base64 encoding)
-      const base64Data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+      const fileDataArray = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setProcessingStatus(`Reading file ${i + 1} of ${files.length}...`);
+        const base64Data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        fileDataArray.push({ name: file.name, data: base64Data });
+      }
+
+      setProcessingStatus("Sending files for AI analysis...");
+
+      const response = await fetch('/api/process-files', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ files: fileDataArray }),
       });
-      
-      // Store the base64 data (it's already in the correct format)
-      sessionStorage.setItem('uploadedFile', base64Data);
-      localStorage.setItem('uploadedFileName', file.name);
-      
-      window.location.href = '/demo/processing';
-    } catch (error) {
-      console.error('Error handling file:', error);
+
+      if (!response.ok) {
+        let errorMsg = 'Failed to process files.';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_) { /* Ignore parsing error */ } 
+        throw new Error(errorMsg);
+      }
+
+      const result = await response.json();
+
+      localStorage.setItem('debtData', JSON.stringify(result.combinedData));
+      localStorage.setItem('dataUpdated', 'true');
+
+      setProcessingStatus("Analysis complete!");
+      setIsProcessing(false);
       setIsUploading(false);
+      setIsUploaded(true);
+
+    } catch (error: unknown) {
+      console.error('Error handling files:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      setProcessingStatus(`Error: ${errorMessage}`);
+      
+      setTimeout(() => {
+        setIsUploading(false);
+        setIsProcessing(false);
+        setProcessingStatus("");
+      }, 5000);
     }
   };
 
@@ -127,14 +177,14 @@ export default function DemoPage() {
                   </svg>
                 </div>
               </div>
-              <CardTitle className="text-2xl text-center">Upload Successful!</CardTitle>
+              <CardTitle className="text-2xl text-center">Analysis Complete!</CardTitle>
               <CardDescription className="text-center mt-2">
-                Your document has been processed successfully.
+                Your financial documents have been processed successfully.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <p className="mb-6 text-center text-muted-foreground">
-                We&apos;ve analyzed your financial document and prepared a personalized debt management dashboard for you.
+                View your personalized debt management dashboard.
               </p>
               <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90">
                 <Link href="/demo/dashboard">View Your Debt Dashboard</Link>
@@ -146,11 +196,10 @@ export default function DemoPage() {
             <CardHeader>
               <CardTitle className="text-2xl text-center">Try Our Demo</CardTitle>
               <CardDescription className="text-center mt-2">
-                Upload a financial document or try one of our sample statements.
+                Upload financial documents or try one of our sample statements.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Sample Statements Section */}
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">Sample Statements</h3>
                 <div className="grid gap-4">
@@ -181,7 +230,6 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              {/* Your existing file upload form */}
               <form onSubmit={handleSubmit} className="space-y-4 mt-8">
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-muted-foreground">
@@ -194,7 +242,9 @@ export default function DemoPage() {
                   
                   <div className="mt-2">
                     <label className="block text-sm font-medium mb-1">
-                      {file ? file.name : "Drag and drop your PDF here or click to browse"}
+                      {files && files.length > 0
+                        ? `${files.length} file${files.length > 1 ? 's' : ''} selected`
+                        : "Drag and drop PDFs pertaining to your auto loan, credit card, and student loan here or click to browse"}
                     </label>
                     <Input
                       id="file-upload"
@@ -203,6 +253,7 @@ export default function DemoPage() {
                       accept=".pdf"
                       onChange={handleFileChange}
                       className="hidden"
+                      multiple
                     />
                     <div>
                       <Button 
@@ -211,12 +262,34 @@ export default function DemoPage() {
                         onClick={() => document.getElementById("file-upload")?.click()}
                         className="mt-2"
                       >
-                        Select File
+                        Select Files
                       </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">PDF files only, max 10MB</p>
+                    <p className="text-xs text-muted-foreground mt-2">PDF files only, max 10MB per file</p>
                   </div>
                 </div>
+                
+                {files && files.length > 0 && (
+                  <div className="mt-2">
+                    <h4 className="text-sm font-medium mb-2">Selected Files:</h4>
+                    <div className="max-h-40 overflow-y-auto rounded-lg border bg-background p-2">
+                      {files.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between py-1 px-2 text-sm">
+                          <div className="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-blue-500">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <path d="M14 2v6h6" />
+                            </svg>
+                            <span className="truncate max-w-[200px]">{file.name}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="text-sm text-muted-foreground">
                   <p className="mb-2"><strong>Don&apos;t have a document?</strong> No problem! You can:</p>
@@ -229,11 +302,24 @@ export default function DemoPage() {
                 <Button 
                   type="submit" 
                   className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:opacity-90"
-                  disabled={!file || isUploading}
+                  disabled={!files || files.length === 0 || isUploading || isProcessing}
                 >
-                  {isUploading ? "Processing..." : "Upload & Process"}
+                  {isProcessing ? processingStatus : (isUploading ? "Uploading..." : "Upload & Analyze")}
                 </Button>
               </form>
+
+              {isProcessing && !isUploaded && (
+                 <div className="mt-4 text-center text-sm text-muted-foreground">
+                   {processingStatus}
+                   <div className="flex justify-center mt-2">
+                     <svg className="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                     </svg>
+                   </div>
+                 </div>
+              )}
+
             </CardContent>
           </Card>
         )}
