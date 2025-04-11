@@ -141,8 +141,9 @@ export default function DemoPage() {
       }
 
       const result = await response.json();
-
-      localStorage.setItem('debtData', JSON.stringify(result.combinedData));
+      
+      // Store the data directly (the API now returns the correctly formatted data)
+      localStorage.setItem('debtData', JSON.stringify(result));
       localStorage.setItem('dataUpdated', 'true');
 
       setProcessingStatus("Analysis complete!");

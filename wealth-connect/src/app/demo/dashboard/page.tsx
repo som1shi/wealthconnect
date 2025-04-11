@@ -189,13 +189,18 @@ export default function DashboardPage() {
     
     if (storedData) {
       try {
-        // Log what we're getting from localStorage for debugging
-        console.log("--- ORIGINAL DATA FROM LOCALSTORAGE ---");
-        console.log(storedData);
-        console.log("--- END OF ORIGINAL DATA ---");
+        // Check if storedData is undefined or "undefined" string
+        if (storedData === "undefined" || storedData === "null") {
+          return; // Use default values
+        }
         
         // Add proper type assertion here
         const extractedData = JSON.parse(storedData) as Record<string, DebtData>;
+        
+        // Validate extracted data has the expected shape
+        if (!extractedData || typeof extractedData !== 'object') {
+          return; // Use default values
+        }
         
         // Set the debt data state with the parsed data
         setDebtData(extractedData);
@@ -237,13 +242,6 @@ export default function DashboardPage() {
           interestSaved: Math.round(totalDebt * (weightedRate/100) * 0.15),
           interestSavedChange: Math.round(monthlyPayment * (weightedRate/1200))
         });
-
-        // Log the final calculated metrics
-        console.log("--- CALCULATED METRICS ---");
-        console.log("Total Debt:", totalDebt);
-        console.log("Monthly Payment:", monthlyPayment);
-        console.log("Interest Rate (weighted):", weightedRate);
-        console.log("--- END OF CALCULATED METRICS ---");
 
       } catch (error) {
         console.error('Error parsing debt data:', error);

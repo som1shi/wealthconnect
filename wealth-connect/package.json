@@ -6,9 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "setup": "pip install PyPDF2",
-    "postinstall": "pip install -r requirements.txt"
+    "lint": "next lint"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
@@ -26,6 +24,8 @@
     "embla-carousel-react": "^8.5.2",
     "lucide-react": "^0.484.0",
     "next": "15.2.4",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^3.11.174",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -39,6 +39,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",

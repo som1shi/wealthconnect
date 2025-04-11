@@ -141,10 +141,8 @@ const extractTextFromPDF = async (pdfData: string): Promise<string> => {
 // PDF parsing helpers
 const extractNumberFromText = (text: string, pattern: RegExp): number | null => {
   const match = text.match(pattern);
-  console.log(`Extracting number with pattern ${pattern}:`, match); // Debug log
   if (match && match[1]) {
     const value = parseFloat(match[1].replace(/[,$]/g, ''));
-    console.log("Extracted value:", value);
     return value;
   }
   return null;
@@ -159,12 +157,8 @@ const extractPercentFromText = (text: string, pattern: RegExp): number | null =>
 };
 
 const parseFinancialData = (text: string) => {
-  // Debug logs
-  console.log("Starting financial data parsing");
-  
   // Student Loans parsing
   const studentLoanSection = text.match(/STUDENT LOANS([\s\S]*?)(?=CREDIT CARD ACCOUNTS|$)/i)?.[1] || '';
-  console.log("Student Loan Section:", studentLoanSection);
 
   const studentLoans = {
     totalAmount: extractNumberFromText(studentLoanSection, /Original Loan Amount:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
@@ -176,7 +170,6 @@ const parseFinancialData = (text: string) => {
 
   // Credit Cards parsing
   const creditCardSection = text.match(/CREDIT CARD ACCOUNTS([\s\S]*?)(?=AUTO LOAN|$)/i)?.[1] || '';
-  console.log("Credit Card Section:", creditCardSection);
 
   const creditCards = {
     totalAmount: extractNumberFromText(creditCardSection, /Total Credit Card Balance:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
@@ -188,7 +181,6 @@ const parseFinancialData = (text: string) => {
 
   // Auto Loan parsing
   const autoLoanSection = text.match(/AUTO LOAN([\s\S]*?)$/i)?.[1] || '';
-  console.log("Auto Loan Section:", autoLoanSection);
 
   const autoLoan = {
     totalAmount: extractNumberFromText(autoLoanSection, /Original Loan Amount:?\s*\$?([\d,]+(?:\.\d{2})?)/i),
@@ -219,7 +211,6 @@ const parseFinancialData = (text: string) => {
     }
   };
 
-  console.log("Final parsed result:", result);
   return result;
 };
 
@@ -228,16 +219,12 @@ const extractDataFromPDF = async (pdfData: string) => {
     // Extract text from PDF
     const text = await extractTextFromPDF(pdfData);
     if (!text) {
-      console.log("No text content found");
       // Return mock data instead of null
       return mockExtractionResults;
     }
 
-    console.log("Extracted PDF text:", text); // Debug log
-
     // Parse the financial data
     const parsedData = parseFinancialData(text);
-    console.log("Parsed financial data:", parsedData); // Debug log
     
     // If parsing failed, return mock data
     if (!parsedData || Object.keys(parsedData).length === 0) {
@@ -278,16 +265,11 @@ export default function ProcessingPage() {
       // Store the verified data
       const dataToStore = extractedData || mockExtractionResults;
       
-      // Calculate total debt
-      const totalDebt = 
-        dataToStore.studentLoans.totalAmount +
-        dataToStore.creditCards.totalAmount +
-        dataToStore.autoLoan.totalAmount;
-
-      // Store both the detailed data and the total
+      // Store data in the correct format expected by the dashboard
       localStorage.setItem('debtData', JSON.stringify({
-        ...dataToStore,
-        totalDebt
+        studentLoans: dataToStore.studentLoans,
+        creditCards: dataToStore.creditCards,
+        autoLoan: dataToStore.autoLoan
       }));
       
       // Mark as newly updated for the dashboard
