@@ -58,7 +58,7 @@ export default function AboutPage() {
                 
                 <div className="p-6 rounded-xl border bg-background/50 backdrop-blur-sm hover:shadow-lg transition-all">
                   <h3 className="text-xl font-bold mb-1">Mihika Bhatnagar</h3>
-                  <p className="text-muted-foreground font-medium mb-3">Chief Investment Officer</p>
+                  <p className="text-muted-foreground font-medium mb-3">Chief Information Officer</p>
                   <div className="h-px w-12 bg-gradient-to-r from-blue-600 to-teal-500"></div>
                 </div>
               </div>
